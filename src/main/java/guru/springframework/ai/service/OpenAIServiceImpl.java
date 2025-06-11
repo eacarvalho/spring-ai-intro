@@ -1,9 +1,5 @@
 package guru.springframework.ai.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import guru.springframework.ai.controller.QuestionController;
 import guru.springframework.ai.model.Answer;
 import guru.springframework.ai.model.GetCapitalRequest;
 import guru.springframework.ai.model.Question;
@@ -13,12 +9,12 @@ import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
+import org.springframework.ai.converter.BeanOutputConverter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
-import java.util.Objects;
 
 @Service
 public class OpenAIServiceImpl implements OpenAIService {
@@ -26,7 +22,6 @@ public class OpenAIServiceImpl implements OpenAIService {
     private static final Logger log = LoggerFactory.getLogger(OpenAIServiceImpl.class);
 
     private final ChatModel chatModel;
-    private final ObjectMapper objectMapper;
 
     @Value("classpath:templates/get-capital-prompt.st")
     private Resource getCapitalPrompt;
@@ -34,11 +29,8 @@ public class OpenAIServiceImpl implements OpenAIService {
     @Value("classpath:templates/get-capital-with-info.st")
     private Resource getCapitalPromptWithInfo;
 
-
-
-    public OpenAIServiceImpl(ChatModel chatModel, ObjectMapper objectMapper) {
+    public OpenAIServiceImpl(ChatModel chatModel) {
         this.chatModel = chatModel;
-        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -52,28 +44,35 @@ public class OpenAIServiceImpl implements OpenAIService {
 
     @Override
     public Answer getCapital(GetCapitalRequest getCapitalRequest) {
+        BeanOutputConverter<Answer> parser = new BeanOutputConverter<>(Answer.class);
+        /**
+         * Your response should be in JSON format.
+         * Do not include any explanations, only provide a RFC8259 compliant JSON response following this format without deviation.
+         * Do not include markdown code blocks in your response.
+         * Remove the ```json markdown from the output.
+         * Here is the JSON Schema instance your output must adhere to:
+         * ```{
+         *   "$schema" : "https://json-schema.org/draft/2020-12/schema",
+         *   "type" : "object",
+         *   "properties" : {
+         *     "answer" : {
+         *       "type" : "string"
+         *     }
+         *   }
+         * }```
+         * */
+        String format = parser.getFormat();
         PromptTemplate promptTemplate = new PromptTemplate(getCapitalPrompt);
-        Prompt prompt = promptTemplate.create(Map.of("stateOrCountry", getCapitalRequest.stateOrCountry()));
+        Prompt prompt = promptTemplate.create(Map.of(
+                "stateOrCountry", getCapitalRequest.stateOrCountry(),
+                "format", format));
         ChatResponse response = chatModel.call(prompt);
 
         String responseText = response.getResult().getOutput().getText();
 
         log.info("Got response: {}", responseText);
 
-        // Do not need this because the template shows the JSON example
-        /*
-        responseText = Objects.requireNonNull(responseText)
-                .replaceAll("```json\\s*", "") // Remove opening ```json
-                .replaceAll("```\\s*$", "")    // Remove closing ```
-                .trim();
-        */
-
-        try {
-            JsonNode jsonNode = objectMapper.readTree(responseText);
-            return new Answer(jsonNode.get("answer").asText());
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        return parser.convert(responseText);
     }
 
     @Override
