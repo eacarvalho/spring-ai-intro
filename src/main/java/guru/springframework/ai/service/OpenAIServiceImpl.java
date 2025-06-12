@@ -1,9 +1,6 @@
 package guru.springframework.ai.service;
 
-import guru.springframework.ai.model.Answer;
-import guru.springframework.ai.model.CapitalWithInfo;
-import guru.springframework.ai.model.GetCapitalRequest;
-import guru.springframework.ai.model.Question;
+import guru.springframework.ai.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
@@ -78,8 +75,8 @@ public class OpenAIServiceImpl implements OpenAIService {
     }
 
     @Override
-    public Answer getCapital(GetCapitalRequest getCapitalRequest) {
-        BeanOutputConverter<Answer> parser = new BeanOutputConverter<>(Answer.class);
+    public GetCapitalResponse getCapital(GetCapitalRequest getCapitalRequest) {
+        BeanOutputConverter<GetCapitalResponse> parser = new BeanOutputConverter<>(GetCapitalResponse.class);
         /**
          * Your response should be in JSON format.
          * Do not include any explanations, only provide a RFC8259 compliant JSON response following this format without deviation.
@@ -91,12 +88,17 @@ public class OpenAIServiceImpl implements OpenAIService {
          *   "type" : "object",
          *   "properties" : {
          *     "answer" : {
-         *       "type" : "string"
+         *       "type" : "string",
+         *       "description" : "This is the city name"
          *     }
-         *   }
+         *   },
+         *   "additionalProperties" : false
          * }```
          * */
         String format = parser.getFormat();
+
+        log.info("JSON Schema response: {}", format);
+
         PromptTemplate promptTemplate = new PromptTemplate(getCapitalPrompt);
         Prompt prompt = promptTemplate.create(Map.of(
                 "stateOrCountry", getCapitalRequest.stateOrCountry(),

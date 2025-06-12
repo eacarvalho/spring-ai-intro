@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: spring-ai-intro
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      embedding:
+        options:
+          model: text-embedding-ada-002
+      chat:
+        options:
+          model: gpt-4.1-2025-04-14
+          temperature: 0.3
+  output:
+    ansi:
+      enabled: ALWAYS
+
+sfg:
+  aiapp:
+    vector-store-enabled: false
+    # vectorStorePath: /tmp/vectorstore.json
+    vectorStorePath: target/vector-store/vectorstore.json
+    documentsToLoad:
+      - classpath:/movies500.csv

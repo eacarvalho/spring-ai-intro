@@ -1,1 +1,1 @@
-What is the capital of {stateOrCountry}? Provide ONLY a JSON response in the format \{"answer": "capital_name"\} with no additional text, formatting, or code blocks.
+What is the capital of {stateOrCountry}? {format}
