@@ -1,6 +1,7 @@
 package guru.springframework.ai.controller;
 
 import guru.springframework.ai.model.Answer;
+import guru.springframework.ai.model.CapitalWithInfo;
 import guru.springframework.ai.model.GetCapitalRequest;
 import guru.springframework.ai.model.Question;
 import guru.springframework.ai.service.OpenAIService;
@@ -23,7 +24,7 @@ public class QuestionController {
     }
 
     @PostMapping("/capitalWithInfo")
-    public Answer getCapitalWithInfo(@RequestBody GetCapitalRequest getCapitalRequest) {
+    public CapitalWithInfo getCapitalWithInfo(@RequestBody GetCapitalRequest getCapitalRequest) {
         return this.openAIService.getCapitalWithInfo(getCapitalRequest);
     }
 

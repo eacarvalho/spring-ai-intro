@@ -1,6 +1,7 @@
 package guru.springframework.ai.service;
 
 import guru.springframework.ai.model.Answer;
+import guru.springframework.ai.model.CapitalWithInfo;
 import guru.springframework.ai.model.GetCapitalRequest;
 import guru.springframework.ai.model.Question;
 
@@ -9,7 +10,7 @@ import guru.springframework.ai.model.Question;
  */
 public interface OpenAIService {
 
-    Answer getCapitalWithInfo(GetCapitalRequest getCapitalRequest);
+    CapitalWithInfo getCapitalWithInfo(GetCapitalRequest getCapitalRequest);
 
     Answer getCapital(GetCapitalRequest getCapitalRequest);
 
