@@ -29,4 +29,5 @@ replay_pid*
 *.iml
 *.ipr
 out/
-target
+target/
+vector-store/

@@ -35,7 +35,7 @@ public class OpenAIServiceImpl implements OpenAIService {
     @Value("classpath:templates/get-capital-with-info.st")
     private Resource getCapitalPromptWithInfo;
 
-    @Value("classpath:/templates/rag-prompt-template.st")
+    @Value("classpath:/templates/rag-prompt-template-meta.st")
     private Resource ragPromptTemplate;
 
     public OpenAIServiceImpl(ChatModel chatModel, SimpleVectorStore simpleVectorStore) {
