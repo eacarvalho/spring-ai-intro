@@ -10,11 +10,15 @@ import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.converter.BeanOutputConverter;
+import org.springframework.ai.document.Document;
+import org.springframework.ai.vectorstore.SearchRequest;
+import org.springframework.ai.vectorstore.SimpleVectorStore;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -23,6 +27,7 @@ public class OpenAIServiceImpl implements OpenAIService {
     private static final Logger log = LoggerFactory.getLogger(OpenAIServiceImpl.class);
 
     private final ChatModel chatModel;
+    private final SimpleVectorStore simpleVectorStore;
 
     @Value("classpath:templates/get-capital-prompt.st")
     private Resource getCapitalPrompt;
@@ -30,8 +35,12 @@ public class OpenAIServiceImpl implements OpenAIService {
     @Value("classpath:templates/get-capital-with-info.st")
     private Resource getCapitalPromptWithInfo;
 
-    public OpenAIServiceImpl(ChatModel chatModel) {
+    @Value("classpath:/templates/rag-prompt-template.st")
+    private Resource ragPromptTemplate;
+
+    public OpenAIServiceImpl(ChatModel chatModel, SimpleVectorStore simpleVectorStore) {
         this.chatModel = chatModel;
+        this.simpleVectorStore = simpleVectorStore;
     }
 
     @Override
@@ -114,8 +123,17 @@ public class OpenAIServiceImpl implements OpenAIService {
 
     @Override
     public Answer getAnswer(Question question) {
-        PromptTemplate promptTemplate = new PromptTemplate(question.question());
-        Prompt prompt = promptTemplate.create();
+        SearchRequest searchRequest = SearchRequest.builder().query(question.question()).topK(4).similarityThreshold(0.2).build();
+        List<Document> documents = simpleVectorStore.similaritySearch(searchRequest);
+        List<String> contentList = documents.stream().map(Document::getText).toList();
+
+        PromptTemplate promptTemplate = new PromptTemplate(ragPromptTemplate);
+        Prompt prompt = promptTemplate.create(Map.of(
+                "input", question.question(),
+                "documents", String.join("\n", contentList)));
+
+//        contentList.forEach(doc -> log.info("Document: {}", doc));
+
         ChatResponse response = chatModel.call(prompt);
 
         return new Answer(response.getResult().getOutput().getText());

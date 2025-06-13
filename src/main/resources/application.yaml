@@ -7,6 +7,7 @@ spring:
       embedding:
         options:
           model: text-embedding-ada-002
+#          model: text-embedding-3-small
       chat:
         options:
           model: gpt-4.1-2025-04-14
@@ -17,8 +18,8 @@ spring:
 
 sfg:
   aiapp:
-    vector-store-enabled: false
+    vector-store-enabled: true
     # vectorStorePath: /tmp/vectorstore.json
-    vectorStorePath: target/vector-store/vectorstore.json
+    vectorStorePath: vector-store/vectorstore.json
     documentsToLoad:
-      - classpath:/movies500.csv
+      - classpath:/movies500Trimmed.csv

@@ -6,6 +6,7 @@ import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.reader.tika.TikaDocumentReader;
 import org.springframework.ai.transformer.splitter.TextSplitter;
 import org.springframework.ai.transformer.splitter.TokenTextSplitter;
+import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.SimpleVectorStore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -16,6 +17,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -23,11 +25,21 @@ import java.util.List;
  */
 @Slf4j
 @Configuration
-@ConditionalOnProperty(prefix = "sfg.aiapp", name = "vector-store-enabled", havingValue = "true")
 public class VectorStoreConfig {
 
     @Bean
+    @ConditionalOnProperty(prefix = "sfg.aiapp", name = "vector-store-enabled", havingValue = "true")
     public SimpleVectorStore simpleVectorStore(EmbeddingModel embeddingModel, VectorStoreProperties vectorStoreProperties) {
+        return getSimpleVectorStore(embeddingModel, vectorStoreProperties);
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = "sfg.aiapp", name = "vector-store-enabled", havingValue = "false", matchIfMissing = true)
+    public SimpleVectorStore fallbackVectorStore(EmbeddingModel embeddingModel) {
+        return mockVectorStore(embeddingModel);
+    }
+
+    private static SimpleVectorStore getSimpleVectorStore(EmbeddingModel embeddingModel, VectorStoreProperties vectorStoreProperties) {
         SimpleVectorStore store = SimpleVectorStore.builder(embeddingModel).build();
 
         // Get the vector store path
@@ -78,6 +90,47 @@ public class VectorStoreConfig {
         }
 
         return store;
+    }
+
+    private static SimpleVectorStore mockVectorStore(EmbeddingModel embeddingModel) {
+        log.warn("****************************************************************************************************************");
+        log.warn("VECTOR STORE IS DISABLED! Enable the full vector store with sfg.aiapp.vector-store-enabled=true in application.yaml");
+        log.warn("****************************************************************************************************************");
+
+        return new SimpleVectorStore(SimpleVectorStore.builder(embeddingModel)) {
+            @Override
+            public List<Document> similaritySearch(SearchRequest request) {
+                log.warn("****************************************************************************************************************");
+                log.warn("VECTOR STORE IS DISABLED! No documents will be returned. RAG functionality will not work properly.");
+                log.warn("****************************************************************************************************************");
+                return Collections.emptyList();
+            }
+
+            @Override
+            public void add(List<Document> documents) {
+                // Do nothing
+            }
+
+            @Override
+            public void save(File file) {
+                // Do nothing
+            }
+
+            @Override
+            public void load(File file) {
+                // Do nothing
+            }
+
+            @Override
+            public void delete(String id) {
+                // Do nothing
+            }
+
+            @Override
+            public void delete(List<String> ids) {
+                // Do nothing
+            }
+        };
     }
 
 }
