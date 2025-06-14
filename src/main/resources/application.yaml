@@ -16,6 +16,9 @@ spring:
     ansi:
       enabled: ALWAYS
 
+weather:
+  key: ${OPEN_WEATHER_KEY}
+
 sfg:
   aiapp:
     vector-store-enabled: true
