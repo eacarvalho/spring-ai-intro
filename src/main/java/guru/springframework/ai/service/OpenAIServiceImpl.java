@@ -1,6 +1,7 @@
 package guru.springframework.ai.service;
 
 import guru.springframework.ai.model.*;
+import io.modelcontextprotocol.client.McpSyncClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
@@ -11,6 +12,7 @@ import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.converter.BeanOutputConverter;
 import org.springframework.ai.document.Document;
+import org.springframework.ai.mcp.SyncMcpToolCallbackProvider;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.SimpleVectorStore;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class OpenAIServiceImpl implements OpenAIService {
@@ -28,6 +31,8 @@ public class OpenAIServiceImpl implements OpenAIService {
 
     private final ChatModel chatModel;
     private final SimpleVectorStore simpleVectorStore;
+    private final ChatClient.Builder chatClientBuilder;
+    private final List<McpSyncClient> mcpSyncClients;
 
     @Value("classpath:templates/get-capital-prompt.st")
     private Resource getCapitalPrompt;
@@ -38,9 +43,11 @@ public class OpenAIServiceImpl implements OpenAIService {
     @Value("classpath:/templates/rag-prompt-template-meta.st")
     private Resource ragPromptTemplate;
 
-    public OpenAIServiceImpl(ChatModel chatModel, SimpleVectorStore simpleVectorStore) {
+    public OpenAIServiceImpl(ChatModel chatModel, SimpleVectorStore simpleVectorStore, ChatClient.Builder chatClientBuilder, List<McpSyncClient> mcpSyncClients) {
         this.chatModel = chatModel;
         this.simpleVectorStore = simpleVectorStore;
+        this.chatClientBuilder = chatClientBuilder;
+        this.mcpSyncClients = mcpSyncClients;
     }
 
     @Override
@@ -147,5 +154,34 @@ public class OpenAIServiceImpl implements OpenAIService {
         ChatResponse response = chatModel.call(prompt);
 
         return response.getResult().getOutput().getText();
+    }
+
+    /**
+     * https://github.com/spring-projects/spring-ai-examples/blob/main/model-context-protocol/brave/src/main/java/org/springframework/ai/mcp/samples/brave/Application.java
+     * @param question
+     * @return
+     */
+    @Override
+    public Answer search(Question question) {
+        // Select only one of the Brave Search clients - choose local or web based on your needs
+        List<McpSyncClient> filteredClients = mcpSyncClients.stream()
+                .collect(Collectors.toMap(
+                        client -> client.getClass().getSimpleName(), // Use class name as key
+                        client -> client,
+                        (existing, replacement) -> existing)) // Keep first instance of each type
+                .values()
+                .stream()
+                .toList();
+
+        ChatClient chatClient = chatClientBuilder
+                .defaultToolCallbacks(new SyncMcpToolCallbackProvider(filteredClients))
+                .build();
+
+        ResponseEntity<ChatResponse, Answer> response = chatClient.prompt(question.question())
+                .call()
+                .responseEntity(new ParameterizedTypeReference<>() {
+                });
+
+        return response.getEntity();
     }
 }

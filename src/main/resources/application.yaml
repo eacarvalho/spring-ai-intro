@@ -12,6 +12,10 @@ spring:
         options:
           model: gpt-4.1-2025-04-14
           temperature: 0.3
+    mcp:
+      client:
+        stdio:
+          servers-configuration: classpath:/mcp-servers-config.json
   output:
     ansi:
       enabled: ALWAYS
@@ -23,3 +27,12 @@ sfg:
     vectorStorePath: vector-store/vectorstore.json
     documentsToLoad:
       - classpath:/movies500Trimmed.csv
+
+logging:
+  level:
+    root: INFO
+    org.springframework.ai.mcp: DEBUG
+    org.springframework.ai.mcp.client.transport.StdioClientTransport: DEBUG
+    org.springframework.ai.mcp.samples.brave: DEBUG
+    io.modelcontextprotocol.client: DEBUG
+    io.modelcontextprotocol.spec: DEBUG
