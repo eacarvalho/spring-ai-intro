@@ -1,7 +1,6 @@
 package guru.springframework.ai.service;
 
 import guru.springframework.ai.model.*;
-import io.modelcontextprotocol.client.McpSyncClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
@@ -13,8 +12,10 @@ import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.converter.BeanOutputConverter;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.mcp.SyncMcpToolCallbackProvider;
+import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.SimpleVectorStore;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.Resource;
@@ -22,7 +23,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 public class OpenAIServiceImpl implements OpenAIService {
@@ -31,8 +31,9 @@ public class OpenAIServiceImpl implements OpenAIService {
 
     private final ChatModel chatModel;
     private final SimpleVectorStore simpleVectorStore;
-    private final ChatClient.Builder chatClientBuilder;
-    private final List<McpSyncClient> mcpSyncClients;
+    private final ToolCallbackProvider toolCallbackProvider;
+    // private final SyncMcpToolCallbackProvider toolCallbackProvider;
+    // private final CustomerScoreService customerScoreService;
 
     @Value("classpath:templates/get-capital-prompt.st")
     private Resource getCapitalPrompt;
@@ -43,12 +44,23 @@ public class OpenAIServiceImpl implements OpenAIService {
     @Value("classpath:/templates/rag-prompt-template-meta.st")
     private Resource ragPromptTemplate;
 
-    public OpenAIServiceImpl(ChatModel chatModel, SimpleVectorStore simpleVectorStore, ChatClient.Builder chatClientBuilder, List<McpSyncClient> mcpSyncClients) {
+    public OpenAIServiceImpl(ChatModel chatModel,
+                             SimpleVectorStore simpleVectorStore,
+                             @Qualifier("customerScoreAndAllTools") ToolCallbackProvider toolCallbackProvider) {
         this.chatModel = chatModel;
         this.simpleVectorStore = simpleVectorStore;
-        this.chatClientBuilder = chatClientBuilder;
-        this.mcpSyncClients = mcpSyncClients;
+        this.toolCallbackProvider = toolCallbackProvider;
     }
+
+//    public OpenAIServiceImpl(ChatModel chatModel,
+//                             SimpleVectorStore simpleVectorStore,
+//                             SyncMcpToolCallbackProvider toolCallbackProvider,
+//                             CustomerScoreService customerScoreService) {
+//        this.chatModel = chatModel;
+//        this.simpleVectorStore = simpleVectorStore;
+//        this.toolCallbackProvider = toolCallbackProvider;
+//        this.customerScoreService = customerScoreService;
+//    }
 
     @Override
     public CapitalWithInfo getCapitalWithInfo(GetCapitalRequest getCapitalRequest) {
@@ -158,26 +170,24 @@ public class OpenAIServiceImpl implements OpenAIService {
 
     /**
      * https://github.com/spring-projects/spring-ai-examples/blob/main/model-context-protocol/brave/src/main/java/org/springframework/ai/mcp/samples/brave/Application.java
+     *
      * @param question
      * @return
      */
     @Override
     public Answer search(Question question) {
-        // Select only one of the Brave Search clients - choose local or web based on your needs
-        List<McpSyncClient> filteredClients = mcpSyncClients.stream()
-                .collect(Collectors.toMap(
-                        client -> client.getClass().getSimpleName(), // Use class name as key
-                        client -> client,
-                        (existing, replacement) -> existing)) // Keep first instance of each type
-                .values()
-                .stream()
-                .toList();
-
-        ChatClient chatClient = chatClientBuilder
-                .defaultToolCallbacks(new SyncMcpToolCallbackProvider(filteredClients))
+        ChatClient chatClient = ChatClient
+                .builder(chatModel)
+                .defaultToolCallbacks(toolCallbackProvider.getToolCallbacks())
+                // .defaultTools(new CustomerScoreService())
                 .build();
 
-        ResponseEntity<ChatResponse, Answer> response = chatClient.prompt(question.question())
+        ResponseEntity<ChatResponse, Answer> response = chatClient
+                .prompt(question.question())
+                .system("""
+                        When using the tools for Customer Score and the customer does not exist, return:
+                        Customer does not exist or does not have score.
+                        """)
                 .call()
                 .responseEntity(new ParameterizedTypeReference<>() {
                 });
