@@ -11,8 +11,11 @@ import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.converter.BeanOutputConverter;
 import org.springframework.ai.document.Document;
+import org.springframework.ai.mcp.SyncMcpToolCallbackProvider;
+import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.SimpleVectorStore;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.Resource;
@@ -28,6 +31,9 @@ public class OpenAIServiceImpl implements OpenAIService {
 
     private final ChatModel chatModel;
     private final SimpleVectorStore simpleVectorStore;
+    private final ToolCallbackProvider toolCallbackProvider;
+    // private final SyncMcpToolCallbackProvider toolCallbackProvider;
+    // private final CustomerScoreService customerScoreService;
 
     @Value("classpath:templates/get-capital-prompt.st")
     private Resource getCapitalPrompt;
@@ -38,10 +44,23 @@ public class OpenAIServiceImpl implements OpenAIService {
     @Value("classpath:/templates/rag-prompt-template-meta.st")
     private Resource ragPromptTemplate;
 
-    public OpenAIServiceImpl(ChatModel chatModel, SimpleVectorStore simpleVectorStore) {
+    public OpenAIServiceImpl(ChatModel chatModel,
+                             SimpleVectorStore simpleVectorStore,
+                             @Qualifier("customerScoreAndAllTools") ToolCallbackProvider toolCallbackProvider) {
         this.chatModel = chatModel;
         this.simpleVectorStore = simpleVectorStore;
+        this.toolCallbackProvider = toolCallbackProvider;
     }
+
+//    public OpenAIServiceImpl(ChatModel chatModel,
+//                             SimpleVectorStore simpleVectorStore,
+//                             SyncMcpToolCallbackProvider toolCallbackProvider,
+//                             CustomerScoreService customerScoreService) {
+//        this.chatModel = chatModel;
+//        this.simpleVectorStore = simpleVectorStore;
+//        this.toolCallbackProvider = toolCallbackProvider;
+//        this.customerScoreService = customerScoreService;
+//    }
 
     @Override
     public CapitalWithInfo getCapitalWithInfo(GetCapitalRequest getCapitalRequest) {
@@ -147,5 +166,32 @@ public class OpenAIServiceImpl implements OpenAIService {
         ChatResponse response = chatModel.call(prompt);
 
         return response.getResult().getOutput().getText();
+    }
+
+    /**
+     * https://github.com/spring-projects/spring-ai-examples/blob/main/model-context-protocol/brave/src/main/java/org/springframework/ai/mcp/samples/brave/Application.java
+     *
+     * @param question
+     * @return
+     */
+    @Override
+    public Answer search(Question question) {
+        ChatClient chatClient = ChatClient
+                .builder(chatModel)
+                .defaultToolCallbacks(toolCallbackProvider.getToolCallbacks())
+                // .defaultTools(new CustomerScoreService())
+                .build();
+
+        ResponseEntity<ChatResponse, Answer> response = chatClient
+                .prompt(question.question())
+                .system("""
+                        When using the tools for Customer Score and the customer does not exist, return:
+                        Customer does not exist or does not have score.
+                        """)
+                .call()
+                .responseEntity(new ParameterizedTypeReference<>() {
+                });
+
+        return response.getEntity();
     }
 }

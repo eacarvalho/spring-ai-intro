@@ -37,4 +37,12 @@ public class QuestionController {
         log.info("Returning answer: {}", answer);
         return answer;
     }
+
+    @PostMapping("/search")
+    public Answer search(@RequestBody Question question) {
+        log.info("Received question: {}", question);
+        Answer answer = openAIService.search(question);
+        log.info("Returning answer: {}", answer);
+        return answer;
+    }
 }
