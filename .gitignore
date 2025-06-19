@@ -31,3 +31,6 @@ replay_pid*
 out/
 target/
 vector-store/
+volumes/etcd
+volumes/milvus
+volumes/minio
