@@ -1,8 +1,9 @@
 spring:
   ai:
     vectorstore:
-      type: simple
+      type: none
 
 sfg:
   aiapp:
+    vector-store-local: true
     vector-store-enabled: false

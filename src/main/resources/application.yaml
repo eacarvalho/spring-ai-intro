@@ -13,7 +13,7 @@ spring:
           model: gpt-4.1-2025-04-14
           temperature: 0.3
     vectorstore:
-#      type: none
+      type: none
       milvus:
         initialize-schema: true
         client:
@@ -73,7 +73,7 @@ spring:
 
 sfg:
   aiapp:
-    vector-store-local: false
+    vector-store-local: true
     vector-store-enabled: true
     # vectorStorePath: /tmp/vectorstore.json
     vectorStorePath: vector-store/vectorstore.json
