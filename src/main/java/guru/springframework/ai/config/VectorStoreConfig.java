@@ -25,6 +25,7 @@ import java.util.List;
  */
 @Slf4j
 @Configuration
+@ConditionalOnProperty(prefix = "sfg.aiapp", name = "vector-store-local", havingValue = "true")
 public class VectorStoreConfig {
 
     @Bean

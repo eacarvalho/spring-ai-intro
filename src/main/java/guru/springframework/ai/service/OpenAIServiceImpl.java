@@ -11,18 +11,20 @@ import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.converter.BeanOutputConverter;
 import org.springframework.ai.document.Document;
-import org.springframework.ai.mcp.SyncMcpToolCallbackProvider;
 import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.ai.vectorstore.SearchRequest;
-import org.springframework.ai.vectorstore.SimpleVectorStore;
+import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+
+import static java.util.Arrays.asList;
 
 @Service
 public class OpenAIServiceImpl implements OpenAIService {
@@ -30,7 +32,7 @@ public class OpenAIServiceImpl implements OpenAIService {
     private static final Logger log = LoggerFactory.getLogger(OpenAIServiceImpl.class);
 
     private final ChatModel chatModel;
-    private final SimpleVectorStore simpleVectorStore;
+    private final VectorStore vectorStore;
     private final ToolCallbackProvider toolCallbackProvider;
     // private final SyncMcpToolCallbackProvider toolCallbackProvider;
     // private final CustomerScoreService customerScoreService;
@@ -44,11 +46,14 @@ public class OpenAIServiceImpl implements OpenAIService {
     @Value("classpath:/templates/rag-prompt-template-meta.st")
     private Resource ragPromptTemplate;
 
+    @Value("classpath:/templates/system-message.st")
+    private Resource systemMessageTemplate;
+
     public OpenAIServiceImpl(ChatModel chatModel,
-                             SimpleVectorStore simpleVectorStore,
+                             VectorStore vectorStore,
                              @Qualifier("customerScoreAndAllTools") ToolCallbackProvider toolCallbackProvider) {
         this.chatModel = chatModel;
-        this.simpleVectorStore = simpleVectorStore;
+        this.vectorStore = vectorStore;
         this.toolCallbackProvider = toolCallbackProvider;
     }
 
@@ -142,18 +147,24 @@ public class OpenAIServiceImpl implements OpenAIService {
 
     @Override
     public Answer getAnswer(Question question) {
+        PromptTemplate systemPromptTemplate = new PromptTemplate(systemMessageTemplate);
+        Prompt systemPrompt = systemPromptTemplate.create();
+
         SearchRequest searchRequest = SearchRequest.builder().query(question.question()).topK(4).similarityThreshold(0.2).build();
-        List<Document> documents = simpleVectorStore.similaritySearch(searchRequest);
+        List<Document> documents = vectorStore.similaritySearch(searchRequest);
         List<String> contentList = documents.stream().map(Document::getText).toList();
 
         PromptTemplate promptTemplate = new PromptTemplate(ragPromptTemplate);
-        Prompt prompt = promptTemplate.create(Map.of(
+        Prompt userPrompt = promptTemplate.create(Map.of(
                 "input", question.question(),
                 "documents", String.join("\n", contentList)));
 
 //        contentList.forEach(doc -> log.info("Document: {}", doc));
 
-        ChatResponse response = chatModel.call(prompt);
+        ChatResponse response = chatModel
+                .call(new Prompt(
+                        asList(systemPrompt.getSystemMessage(), userPrompt.getUserMessage())
+                ));
 
         return new Answer(response.getResult().getOutput().getText());
     }
