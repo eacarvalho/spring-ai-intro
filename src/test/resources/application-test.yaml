@@ -1,3 +1,8 @@
+spring:
+  ai:
+    vectorstore:
+      type: simple
+
 sfg:
   aiapp:
     vector-store-enabled: false
