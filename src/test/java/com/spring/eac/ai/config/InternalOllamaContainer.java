@@ -39,7 +39,7 @@ public class InternalOllamaContainer extends OllamaContainer {
         try {
             super.start();
         } catch (ContainerFetchException ex) {
-            // If an image doesn't exist, create it. Subsequent runs will reuse the image.
+            // If an image doesn't exist, create it. Later runs will reuse the image.
             createImage(imageName);
             super.start();
         }

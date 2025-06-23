@@ -3,6 +3,10 @@ spring:
     chat:
       client:
         enabled: true
+    ollama:
+      chat:
+        options:
+          temperature: 0.3
     vectorstore:
       type: none
 
