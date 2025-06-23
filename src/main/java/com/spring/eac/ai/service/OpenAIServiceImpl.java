@@ -6,12 +6,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.ResponseEntity;
+import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.converter.BeanOutputConverter;
 import org.springframework.ai.document.Document;
+import org.springframework.ai.model.ModelOptionsUtils;
 import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.ai.tool.function.FunctionToolCallback;
 import org.springframework.ai.vectorstore.SearchRequest;
@@ -212,9 +214,7 @@ public class OpenAIServiceImpl implements OpenAIService {
 
     @Override
     public Answer weather(Question question) {
-        BeanOutputConverter<WeatherRequest> parser = new BeanOutputConverter<>(WeatherRequest.class);
-        String jsonSchema = parser.getJsonSchema();
-
+        String jsonSchema = ModelOptionsUtils.getJsonSchema(WeatherRequest.class, false);
         FunctionToolCallback<WeatherRequest, WeatherResponse> functionToolCallback = FunctionToolCallback
                 .builder("CurrentWeather", new WeatherServiceFunction(ninjasApiKey))
                 .description("Get the current weather for a location")
@@ -227,11 +227,13 @@ public class OpenAIServiceImpl implements OpenAIService {
                 .defaultToolCallbacks(functionToolCallback)
                 .build();
 
-        PromptTemplate promptTemplate = new PromptTemplate(question.question());
-        Prompt prompt = promptTemplate.create();
-
+        UserMessage userMessage = new UserMessage(question.question());
         ChatResponse response = chatClient
-                .prompt(prompt)
+                .prompt(userMessage.getText())
+                .system("""
+                        Asking for weather or temperature of a city, state or country first get the coordinates 
+                        latitude and longitude in order to call the Weather API and return all the details available.
+                        """)
                 .call()
                 .chatResponse();
 

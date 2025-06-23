@@ -7,6 +7,10 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import java.math.BigDecimal;
 
 public record WeatherResponse(
+        @JsonProperty("location")
+        @JsonPropertyDescription("The location of the weather")
+        String location,
+
         @JsonProperty("wind_speed")
         @JsonPropertyDescription("WindSpeed in KMH")
         BigDecimal windSpeed,
@@ -51,10 +55,10 @@ public record WeatherResponse(
     @Override
     public String toString() {
         return String.format(
-                "Weather{temp=%d°C, feels_like=%d°C, humidity=%d%%, wind_speed=%.2f km/h, " +
+                "Weather{location=%s, temp=%d°C, feels_like=%d°C, humidity=%d%%, wind_speed=%.2f km/h, " +
                         "wind_degrees=%d°, cloud_pct=%d%%, min_temp=%d°C, max_temp=%d°C, " +
                         "sunrise=%d, sunset=%d}",
-                temp, feelsLike, humidity, windSpeed, windDegrees, cloudPct,
+                location, temp, feelsLike, humidity, windSpeed, windDegrees, cloudPct,
                 minTemp, maxTemp, sunrise, sunset
         );
     }
