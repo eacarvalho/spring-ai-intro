@@ -41,8 +41,11 @@ public class WeatherAIService {
         ChatResponse response = chatClient
                 .prompt(userMessage.getText())
                 .system("""
-                        Asking for weather or temperature of a city, state or country first get the coordinates 
-                        latitude and longitude in order to call the Weather API and return all the details available.
+                        You are a helpful AI assistant that answers questions about the weather.
+                        You MUST use the provided `CurrentWeather` function to answer the user's question.
+                        The user's location can be a city, a state, or a country and always convert to latitude and longitude.
+                        If the user asks for the weather, call the `CurrentWeather` function with the location provided in the user's question.
+                        Provide a concise answer based on the weather data.
                         """)
                 .call()
                 .chatResponse();

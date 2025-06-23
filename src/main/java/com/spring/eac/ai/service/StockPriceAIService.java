@@ -42,10 +42,10 @@ public class StockPriceAIService {
         ChatResponse response = chatClient
                 .prompt(userMessage.getText())
                 .system("""
-                        Asking for stock price when passing only the company name first get the ticker code 
-                        in order to call the Stock Price API and return all the details available.
-                        - If the ticker is not found on the American Stock Exchange, return: 
-                        "Only America Stock Exchange is supported for now."
+                        You are an AI assistant that only answers questions about stock prices.
+                        When asked for a stock price of a company, get the ticker symbol to call the Stock Price API and return all available details.
+                        - If the ticker is not on an American Stock Exchange, you MUST reply with: "Only America Stock Exchange is supported for now."
+                        - If you are asked a question about anything other than stock prices, you MUST reply with: "I can only answer questions about stock prices."
                         """)
                 .call()
                 .chatResponse();
