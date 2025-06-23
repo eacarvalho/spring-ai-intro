@@ -1,6 +1,6 @@
 package com.spring.eac.ai.bootstrap;
 
-import com.spring.eac.ai.config.VectorStoreProperties;
+import com.spring.eac.ai.property.ApplicationProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.reader.tika.TikaDocumentReader;
@@ -22,11 +22,11 @@ import java.util.List;
 public class LoadVectorStore implements CommandLineRunner {
 
     private final VectorStore vectorStore;
-    private final VectorStoreProperties vectorStoreProperties;
+    private final ApplicationProperties applicationProperties;
 
-    public LoadVectorStore(VectorStore vectorStore, VectorStoreProperties vectorStoreProperties) {
+    public LoadVectorStore(VectorStore vectorStore, ApplicationProperties applicationProperties) {
         this.vectorStore = vectorStore;
-        this.vectorStoreProperties = vectorStoreProperties;
+        this.applicationProperties = applicationProperties;
     }
 
     @Override
@@ -35,7 +35,7 @@ public class LoadVectorStore implements CommandLineRunner {
         if (vectorStore.similaritySearch("Sportsman").isEmpty()){
             log.info("Loading documents into vector store");
 
-            vectorStoreProperties.getDocumentsToLoad().forEach(document -> {
+            applicationProperties.getDocumentsToLoad().forEach(document -> {
                 log.info("Loading document: {}", document.getFilename());
 
                 TikaDocumentReader documentReader = new TikaDocumentReader(document);

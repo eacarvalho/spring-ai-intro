@@ -1,5 +1,6 @@
 package com.spring.eac.ai.config;
 
+import com.spring.eac.ai.property.ApplicationProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.embedding.EmbeddingModel;
@@ -30,8 +31,8 @@ public class VectorStoreConfig {
 
     @Bean
     @ConditionalOnProperty(prefix = "sfg.aiapp", name = "vector-store-enabled", havingValue = "true")
-    public SimpleVectorStore simpleVectorStore(EmbeddingModel embeddingModel, VectorStoreProperties vectorStoreProperties) {
-        return getSimpleVectorStore(embeddingModel, vectorStoreProperties);
+    public SimpleVectorStore simpleVectorStore(EmbeddingModel embeddingModel, ApplicationProperties applicationProperties) {
+        return getSimpleVectorStore(embeddingModel, applicationProperties);
     }
 
     @Bean
@@ -40,11 +41,11 @@ public class VectorStoreConfig {
         return mockVectorStore(embeddingModel);
     }
 
-    private static SimpleVectorStore getSimpleVectorStore(EmbeddingModel embeddingModel, VectorStoreProperties vectorStoreProperties) {
+    private static SimpleVectorStore getSimpleVectorStore(EmbeddingModel embeddingModel, ApplicationProperties applicationProperties) {
         SimpleVectorStore store = SimpleVectorStore.builder(embeddingModel).build();
 
         // Get the vector store path
-        String vectorStorePath = vectorStoreProperties.getVectorStorePath();
+        String vectorStorePath = applicationProperties.getVectorStorePath();
 
         // Create parent directories if they don't exist
         try {
@@ -64,7 +65,7 @@ public class VectorStoreConfig {
             store.load(vectorStoreFile);
         } else {
             log.debug("Loading documents into vector store");
-            vectorStoreProperties.getDocumentsToLoad().forEach(document -> {
+            applicationProperties.getDocumentsToLoad().forEach(document -> {
                 log.debug("Loading document: " + document.getFilename());
                 TikaDocumentReader documentReader = new TikaDocumentReader(document);
                 List<Document> docs = documentReader.get();

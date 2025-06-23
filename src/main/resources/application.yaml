@@ -73,7 +73,7 @@ spring:
 
 sfg:
   aiapp:
-    weather-api-key: ${NINJAS_API_KEY}
+    ninjas-api-key: ${NINJAS_API_KEY}
     vector-store-local: true
     vector-store-enabled: true
     # vectorStorePath: /tmp/vectorstore.json

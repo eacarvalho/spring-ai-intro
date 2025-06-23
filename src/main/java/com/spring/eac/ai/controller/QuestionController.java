@@ -2,6 +2,7 @@ package com.spring.eac.ai.controller;
 
 import com.spring.eac.ai.model.*;
 import com.spring.eac.ai.service.OpenAIService;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,14 +12,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1")
+@RequiredArgsConstructor
 public class QuestionController {
 
     private static final Logger log = LoggerFactory.getLogger(QuestionController.class);
     private final OpenAIService openAIService;
-
-    public QuestionController(OpenAIService openAIService) {
-        this.openAIService = openAIService;
-    }
 
     @PostMapping("/capitalWithInfo")
     public CapitalWithInfo getCapitalWithInfo(@RequestBody GetCapitalRequest getCapitalRequest) {
@@ -44,15 +42,5 @@ public class QuestionController {
         Answer answer = openAIService.search(question);
         log.info("Returning answer: {}", answer);
         return answer;
-    }
-
-    @PostMapping("/weather")
-    public Answer weather(@RequestBody Question question) {
-        return openAIService.getWeather(question);
-    }
-
-    @PostMapping("/stockprice")
-    public Answer stockprice(@RequestBody Question question) {
-        return openAIService.getStockPrice(question);
     }
 }

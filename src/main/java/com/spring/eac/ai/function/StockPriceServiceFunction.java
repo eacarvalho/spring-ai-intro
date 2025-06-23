@@ -15,7 +15,7 @@ import java.util.function.Function;
 @Slf4j
 public class StockPriceServiceFunction implements Function<StockPriceRequest, StockPriceResponse> {
 
-    public static final String STOCK_PRICE_URL = "https://api.api-ninjas.com/v1/stockprice";
+    public static final String STOCK_URL = "https://api.api-ninjas.com/v1/stockprice";
 
     private final String ninjasApiKey;
 
@@ -32,7 +32,7 @@ public class StockPriceServiceFunction implements Function<StockPriceRequest, St
         }
 
         RestClient restClient = RestClient.builder()
-                .baseUrl(STOCK_PRICE_URL)
+                .baseUrl(STOCK_URL)
                 .defaultHeaders(httpHeaders -> {
                     httpHeaders.set("X-Api-Key", ninjasApiKey);
                     httpHeaders.set("Accept", "application/json");
