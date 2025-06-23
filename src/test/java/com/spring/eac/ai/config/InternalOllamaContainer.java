@@ -11,16 +11,14 @@ import java.io.IOException;
 public class InternalOllamaContainer extends OllamaContainer {
 
     public static final String MODEL_NAME = "llama2:latest";
+    public static final String IMAGE_NAME = "internal/" + MODEL_NAME;
 
-    private final String imageName;
-
-    public InternalOllamaContainer(String imageName) {
-        super(DockerImageName.parse(imageName).asCompatibleSubstituteFor("ollama/ollama:0.1.48"));
-        this.imageName = imageName;
+    public InternalOllamaContainer() {
+        super(DockerImageName.parse(IMAGE_NAME).asCompatibleSubstituteFor("ollama/ollama:0.1.48"));
     }
 
     public void createImage(String imageName) {
-        var ollama = new OllamaContainer("ollama/ollama:0.1.48");
+        OllamaContainer ollama = new OllamaContainer("ollama/ollama:0.1.48");
         try {
             ollama.start();
             log.info("Start pulling the '{}' generative ... would take several minutes ...", MODEL_NAME);
@@ -40,7 +38,7 @@ public class InternalOllamaContainer extends OllamaContainer {
             super.start();
         } catch (ContainerFetchException ex) {
             // If an image doesn't exist, create it. Later runs will reuse the image.
-            createImage(imageName);
+            createImage(super.getDockerImageName());
             super.start();
         }
     }

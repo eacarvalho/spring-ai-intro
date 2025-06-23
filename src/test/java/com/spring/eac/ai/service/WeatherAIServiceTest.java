@@ -34,7 +34,7 @@ class WeatherAIServiceTest {
 
     @Container
     @ServiceConnection
-    static OllamaContainer ollama = new InternalOllamaContainer("internal/" + InternalOllamaContainer.MODEL_NAME);
+    static OllamaContainer ollama = new InternalOllamaContainer();
 
     @Autowired
     private WeatherAIService weatherAIService;
