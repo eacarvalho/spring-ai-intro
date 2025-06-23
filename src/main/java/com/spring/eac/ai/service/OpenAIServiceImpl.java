@@ -230,11 +230,11 @@ public class OpenAIServiceImpl implements OpenAIService {
         PromptTemplate promptTemplate = new PromptTemplate(question.question());
         Prompt prompt = promptTemplate.create();
 
-        ResponseEntity<ChatResponse, WeatherResponse> response = chatClient
+        ChatResponse response = chatClient
                 .prompt(prompt)
                 .call()
-                .responseEntity(new ParameterizedTypeReference<>() {});
+                .chatResponse();
 
-        return new Answer(response.getEntity().toString());
+        return new Answer(response.getResult().getOutput().getText());
     }
 }
