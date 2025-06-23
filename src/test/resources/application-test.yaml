@@ -1,5 +1,8 @@
 spring:
   ai:
+    chat:
+      client:
+        enabled: true
     vectorstore:
       type: none
 
