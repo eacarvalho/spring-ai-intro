@@ -48,6 +48,11 @@ public class QuestionController {
 
     @PostMapping("/weather")
     public Answer weather(@RequestBody Question question) {
-        return openAIService.weather(question);
+        return openAIService.getWeather(question);
+    }
+
+    @PostMapping("/stockprice")
+    public Answer stockprice(@RequestBody Question question) {
+        return openAIService.getStockPrice(question);
     }
 }

@@ -1,5 +1,6 @@
 package com.spring.eac.ai.service;
 
+import com.spring.eac.ai.function.StockPriceServiceFunction;
 import com.spring.eac.ai.function.WeatherServiceFunction;
 import com.spring.eac.ai.model.*;
 import org.slf4j.Logger;
@@ -213,7 +214,7 @@ public class OpenAIServiceImpl implements OpenAIService {
     }
 
     @Override
-    public Answer weather(Question question) {
+    public Answer getWeather(Question question) {
         String jsonSchema = ModelOptionsUtils.getJsonSchema(WeatherRequest.class, false);
         FunctionToolCallback<WeatherRequest, WeatherResponse> functionToolCallback = FunctionToolCallback
                 .builder("CurrentWeather", new WeatherServiceFunction(ninjasApiKey))
@@ -233,6 +234,36 @@ public class OpenAIServiceImpl implements OpenAIService {
                 .system("""
                         Asking for weather or temperature of a city, state or country first get the coordinates 
                         latitude and longitude in order to call the Weather API and return all the details available.
+                        """)
+                .call()
+                .chatResponse();
+
+        return new Answer(response.getResult().getOutput().getText());
+    }
+
+    @Override
+    public Answer getStockPrice(Question question) {
+        String jsonSchema = ModelOptionsUtils.getJsonSchema(StockPriceRequest.class, false);
+        FunctionToolCallback<StockPriceRequest, StockPriceResponse> functionToolCallback = FunctionToolCallback
+                .builder("CurrentStockPrice", new StockPriceServiceFunction(ninjasApiKey))
+                .description("Get the current stock price for a stock symbol")
+                .inputType(StockPriceRequest.class)
+                .inputSchema(jsonSchema)
+                .build();
+
+        ChatClient chatClient = ChatClient
+                .builder(chatModel)
+                .defaultToolCallbacks(functionToolCallback)
+                .build();
+
+        UserMessage userMessage = new UserMessage(question.question());
+        ChatResponse response = chatClient
+                .prompt(userMessage.getText())
+                .system("""
+                        Asking for stock price when passing only the company name first get the ticker code 
+                        in order to call the Stock Price API and return all the details available.
+                        - If the ticker is not found on the American Stock Exchange, return: 
+                        "Only America Stock Exchange is supported for now."
                         """)
                 .call()
                 .chatResponse();
