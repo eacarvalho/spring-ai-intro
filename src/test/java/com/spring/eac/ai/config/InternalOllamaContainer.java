@@ -3,7 +3,6 @@ package com.spring.eac.ai.config;
 import com.github.dockerjava.api.model.Image;
 import lombok.extern.slf4j.Slf4j;
 import org.testcontainers.DockerClientFactory;
-import org.testcontainers.containers.ContainerFetchException;
 import org.testcontainers.ollama.OllamaContainer;
 import org.testcontainers.utility.DockerImageName;
 
@@ -14,26 +13,27 @@ import java.util.List;
 public class InternalOllamaContainer extends OllamaContainer {
 
     public static final String MODEL_NAME = "llama3.1:8b";
-    public static final String TC_IMAGE_NAME = "tc-" + MODEL_NAME;
-    public static final String OLLAMA_VERSION = "0.9.2"; //0.9.2;0.1.48
-    public static final String OLLAMA_DOCKER_IMAGE = "ollama/ollama:" + OLLAMA_VERSION;
+    public static final String TC_IMAGE_NAME = "internal/tc-" + MODEL_NAME;
+    public static final String OLLAMA_DOCKER_IMAGE = "ollama/ollama:0.9.2";
+    // public static final String OLLAMA_DOCKER_IMAGE = "ollama/ollama:0.4.8";
 
     public InternalOllamaContainer() {
         super(DockerImageName.parse(TC_IMAGE_NAME).asCompatibleSubstituteFor(OLLAMA_DOCKER_IMAGE));
     }
 
     public void createImage(String imageName) {
+        log.info("Creating a new Ollama container with {} image...", MODEL_NAME);
         OllamaContainer ollama = new OllamaContainer(OLLAMA_DOCKER_IMAGE);
+        ollama.start();
         try {
-            ollama.start();
             log.info("Start pulling the '{}' generative ... would take several minutes ...", MODEL_NAME);
             ollama.execInContainer("ollama", "pull", MODEL_NAME);
             log.info("{} pulling competed!", MODEL_NAME);
         } catch (IOException | InterruptedException e) {
-            throw new ContainerFetchException(e.getMessage());
+            throw new RuntimeException(e);
         }
         log.info("Start committing the '{}' image ... would take several minutes ...", imageName);
-        ollama.commitToImage(imageName);
+        ollama.commitToImage(TC_IMAGE_NAME);
         log.info("Finish committing the '{}' image!", imageName);
     }
 
@@ -45,11 +45,11 @@ public class InternalOllamaContainer extends OllamaContainer {
                 .exec();
 
         if (listImagesCmd.isEmpty()) {
-            createImage(TC_IMAGE_NAME);
+            this.createImage(TC_IMAGE_NAME);
         } else {
-            log.info("Using existing Ollama container with {}} image", TC_IMAGE_NAME);
+            log.info("Using existing Ollama container with {} image...", MODEL_NAME);
+            // Substitute the default Ollama image with our Gemma variant
+            super.start();
         }
-
-        super.start();
     }
 }
