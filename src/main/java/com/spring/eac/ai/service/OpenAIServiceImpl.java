@@ -1,5 +1,6 @@
 package com.spring.eac.ai.service;
 
+import com.spring.eac.ai.function.WeatherServiceFunction;
 import com.spring.eac.ai.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +13,7 @@ import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.converter.BeanOutputConverter;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.tool.ToolCallbackProvider;
+import org.springframework.ai.tool.function.FunctionToolCallback;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -47,6 +49,9 @@ public class OpenAIServiceImpl implements OpenAIService {
 
     @Value("classpath:/templates/system-message.st")
     private Resource systemMessageTemplate;
+
+    @Value("${sfg.aiapp.weather-api-key}")
+    private String ninjasApiKey;
 
     public OpenAIServiceImpl(ChatModel chatModel,
                              VectorStore vectorStore,
@@ -203,5 +208,33 @@ public class OpenAIServiceImpl implements OpenAIService {
                 });
 
         return response.getEntity();
+    }
+
+    @Override
+    public Answer weather(Question question) {
+        BeanOutputConverter<WeatherRequest> parser = new BeanOutputConverter<>(WeatherRequest.class);
+        String jsonSchema = parser.getJsonSchema();
+
+        FunctionToolCallback<WeatherRequest, WeatherResponse> functionToolCallback = FunctionToolCallback
+                .builder("CurrentWeather", new WeatherServiceFunction(ninjasApiKey))
+                .description("Get the current weather for a location")
+                .inputType(WeatherRequest.class)
+                .inputSchema(jsonSchema)
+                .build();
+
+        ChatClient chatClient = ChatClient
+                .builder(chatModel)
+                .defaultToolCallbacks(functionToolCallback)
+                .build();
+
+        PromptTemplate promptTemplate = new PromptTemplate(question.question());
+        Prompt prompt = promptTemplate.create();
+
+        ResponseEntity<ChatResponse, WeatherResponse> response = chatClient
+                .prompt(prompt)
+                .call()
+                .responseEntity(new ParameterizedTypeReference<>() {});
+
+        return new Answer(response.getEntity().toString());
     }
 }

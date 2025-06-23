@@ -45,4 +45,9 @@ public class QuestionController {
         log.info("Returning answer: {}", answer);
         return answer;
     }
+
+    @PostMapping("/weather")
+    public Answer weather(@RequestBody Question question) {
+        return openAIService.weather(question);
+    }
 }

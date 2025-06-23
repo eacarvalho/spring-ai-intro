@@ -16,4 +16,6 @@ public interface OpenAIService {
     Answer getAnswer(Question question);
 
     Answer search(Question question);
+
+    Answer weather(Question question);
 }
