@@ -36,7 +36,6 @@ public class WeatherAIService {
 
         ChatClient chatClient = ChatClient
                 .builder(chatModel)
-                .defaultToolNames("CurrentWeather")
                 .defaultToolCallbacks(functionToolCallback)
                 .build();
 
