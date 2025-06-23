@@ -1,5 +1,6 @@
 package com.spring.eac.ai.service;
 
+import com.spring.eac.ai.config.InternalOllamaContainer;
 import com.spring.eac.ai.model.Answer;
 import com.spring.eac.ai.model.Question;
 import lombok.extern.slf4j.Slf4j;
@@ -7,15 +8,9 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.ai.chat.model.ChatModel;
-import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.TestPropertySource;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -30,33 +25,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @Disabled("Disabling this test class temporarily")
 @Testcontainers
 @SpringBootTest
-@TestPropertySource(properties = "spring.ai.ollama.chat.options.model=" + WeatherAIServiceTest.MODEL)
+@TestPropertySource(properties = {
+        "spring.ai.ollama.chat.options.model=" + InternalOllamaContainer.MODEL_NAME,
+        "spring.ai.chat.client.enabled=false"
+})
 @Slf4j
 class WeatherAIServiceTest {
 
-    protected static final String MODEL = "orca-mini"; // llama2; orca-mini
-
     @Container
     @ServiceConnection
-    static OllamaContainer ollama = new OllamaContainer("ollama/ollama:0.1.48").withReuse(true);;
-
-    @TestConfiguration
-    static class Config {
-        private static final String CHAT_MODEL = "ollamaChatModel"; // openAiChatModel
-        private static final String EMBEDDING_MODEL = "ollamaEmbeddingModel"; //openAiEmbeddingModel
-
-        @Bean
-        @Primary
-        public ChatModel chatModel(@Qualifier(CHAT_MODEL) ChatModel chatModel) {
-            return chatModel;
-        }
-
-        @Bean
-        @Primary
-        public EmbeddingModel embeddingModel(@Qualifier(EMBEDDING_MODEL) EmbeddingModel embeddingModel) {
-            return embeddingModel;
-        }
-    }
+    static OllamaContainer ollama = new InternalOllamaContainer();
 
     @Autowired
     private WeatherAIService weatherAIService;
@@ -66,16 +44,13 @@ class WeatherAIServiceTest {
         if (!ollama.isRunning()) {
             ollama.start();
         }
-        log.info("Start pulling the '{}' generative ... would take several minutes ...", MODEL);
-        ollama.execInContainer("ollama", "pull", MODEL);
-        log.info("{}} pulling competed!", MODEL);
     }
 
     @Test
     @DisplayName("Given a valid location, when asking for weather, then it should return the weather information.")
     void getWeather_givenValidLocation_shouldReturnWeatherInformation() {
         // Given
-        var question = new Question("What's the weather considering the latitude 51.509865 and -0.118092 longitude?");
+        var question = new Question("What is the weather now considering the latitude 51.509865 and -0.118092 longitude?");
 
         // When
         Answer answer = weatherAIService.getWeather(question);
@@ -118,6 +93,6 @@ class WeatherAIServiceTest {
         assertThat(answer).isNotNull();
         // The AI is instructed to answer questions about weather, so it should not answer about stocks.
         String actualAnswer = answer.answer().toLowerCase();
-        assertFalse(actualAnswer.contains("weather"), "Response should indicate its purpose is related to weather.");
+        assertFalse(actualAnswer.contains("temperature"), "Response should indicate its purpose is related to weather.");
     }
 }
