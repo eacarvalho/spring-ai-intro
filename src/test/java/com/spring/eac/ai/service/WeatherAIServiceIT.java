@@ -2,7 +2,7 @@ package com.spring.eac.ai.service;
 
 import com.spring.eac.ai.model.Answer;
 import com.spring.eac.ai.model.Question;
-import com.spring.eac.ai.testcontainer.LlamaTestContainer;
+import com.spring.eac.ai.testcontainer.OllamaTestContainer;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @Disabled("Disabling this test class temporarily")
 @SpringBootTest
 @Slf4j
-class WeatherAIServiceTest extends LlamaTestContainer {
+class WeatherAIServiceIT extends OllamaTestContainer {
 
     @Autowired
     private WeatherAIService weatherAIService;

@@ -18,6 +18,11 @@
 	<properties>
 		<java.version>21</java.version>
 		<spring-ai.version>1.0.0</spring-ai.version>
+
+		<!-- Plugin versions -->
+		<maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
+		<maven-failsafe-plugin.version>3.2.5</maven-failsafe-plugin.version>
+		<jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
 	</properties>
 
 	<dependencies>
@@ -137,6 +142,113 @@
 						</path>
 					</annotationProcessorPaths>
 				</configuration>
+			</plugin>
+			<!-- JaCoCo Plugin - MUST come before Surefire -->
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>${jacoco-maven-plugin.version}</version>
+				<executions>
+					<!-- Prepare agent for unit tests -->
+					<execution>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+
+					<!-- Prepare agent for integration tests (appends to same file) -->
+					<execution>
+						<id>prepare-agent-integration</id>
+						<phase>pre-integration-test</phase>
+						<goals>
+							<goal>prepare-agent-integration</goal>
+						</goals>
+						<configuration>
+							<!-- This appends IT coverage to the same jacoco.exec file -->
+							<destFile>${project.build.directory}/jacoco.exec</destFile>
+							<append>true</append>
+						</configuration>
+					</execution>
+
+					<!-- Generate consolidated report after both test types -->
+					<execution>
+						<id>report</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<!-- Surefire Plugin for Unit Tests -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>${maven-surefire-plugin.version}</version>
+				<configuration>
+					<!-- Include patterns for unit tests -->
+					<includes>
+						<include>**/*Test.java</include>
+						<include>**/*Tests.java</include>
+						<include>**/Test*.java</include>
+					</includes>
+					<!-- Exclude integration tests -->
+					<excludes>
+						<exclude>**/*IT.java</exclude>
+						<exclude>**/*ITTest.java</exclude>
+						<exclude>**/*IntegrationTest.java</exclude>
+						<exclude>**/*IntegrationTests.java</exclude>
+					</excludes>
+					<argLine>
+						@{argLine}
+						-Xshare:off
+						-XX:+EnableDynamicAgentLoading
+						-Djdk.instrument.traceUsage=false
+					</argLine>
+					<!-- Reporting -->
+					<reportFormat>xml</reportFormat>
+					<useFile>false</useFile>
+					<trimStackTrace>false</trimStackTrace>
+				</configuration>
+			</plugin>
+			<!-- Failsafe Plugin for Integration Tests -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<version>${maven-failsafe-plugin.version}</version>
+				<configuration>
+					<!-- Include patterns for integration tests -->
+					<includes>
+						<include>**/*IT.java</include>
+						<include>**/*IntegrationTest.java</include>
+						<include>**/*IntegrationTests.java</include>
+					</includes>
+					<!-- Exclude patterns for unit tests -->
+					<excludes>
+						<exclude>**/*Test.java</exclude>
+						<exclude>**/*Tests.java</exclude>
+						<exclude>**/Test*.java</exclude>
+					</excludes>
+					<argLine>
+						@{argLine}
+						-Xshare:off
+						-XX:+EnableDynamicAgentLoading
+						-Djdk.instrument.traceUsage=false
+						-Xmx4g
+					</argLine>
+					<!-- Reporting -->
+					<reportFormat>xml</reportFormat>
+					<useFile>false</useFile>
+					<trimStackTrace>false</trimStackTrace>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>

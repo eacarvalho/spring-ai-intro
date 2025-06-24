@@ -15,7 +15,12 @@ import java.util.List;
 @Slf4j
 public class OllamaContainerFactory {
 
-    private static final String OLLAMA_DOCKER_IMAGE = "ollama/ollama:0.9.2";
+    /**
+     * REPOSITORY     TAG     CREATED         SIZE
+     * ollama/ollama  0.9.2   5 days ago      7.34GB
+     * ollama/ollama  0.3.6   10 months ago   1.1GB
+     */
+    private static final String OLLAMA_DOCKER_IMAGE = "ollama/ollama:0.3.6";
 
     public static OllamaContainer createContainer(String modelName) {
         String imageName = "internal/tc-ollama-" + modelName;

@@ -18,5 +18,10 @@ sfg:
 logging:
   level:
     root: INFO
-    org.testcontainers: TRACE
-    tc.testcontainers: TRACE
+    org.testcontainers: DEBUG
+    tc.testcontainers: DEBUG
+    org.springframework.ai.mcp: INFO
+    org.springframework.ai.mcp.client.transport.StdioClientTransport: INFO
+    org.springframework.ai.mcp.samples.brave: INFO
+    io.modelcontextprotocol.client: INFO
+    io.modelcontextprotocol.spec: INFO
