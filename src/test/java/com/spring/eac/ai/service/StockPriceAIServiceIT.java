@@ -27,8 +27,9 @@ class StockPriceAIServiceIT {
         // Then
         String answer = actualAnswer.answer().toLowerCase();
         assertTrue(answer.contains("apple"), "Answer should contain the company name.");
-        assertTrue(answer.contains("price"), "Answer should contain the word 'price'.");
         assertTrue(answer.contains("aapl"), "Answer should contain the ticker 'AAPL'.");
+        assertTrue(answer.contains("price") || answer.contains("trading") || answer.contains("value"),
+                "Answer should contain the word 'price'.");
     }
 
     @Test

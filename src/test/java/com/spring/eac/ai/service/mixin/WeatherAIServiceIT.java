@@ -9,15 +9,13 @@ import org.junit.jupiter.api.Nested;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@Disabled("Disabling this test class temporarily")
 @DisplayName("Weather AI Service Tests")
 public class WeatherAIServiceIT {
 
     @Nested
     @SpringBootTest
     @DisplayName("With Llama Model")
-    @Disabled("Disabling this test class temporarily")
-    class WeatherAIServiceLlamaTest extends LlamaTestContainer implements WeatherAIServiceMixinTest  {
+    class WeatherAIServiceLlamaIT extends LlamaTestContainer implements WeatherAIServiceMixinTest  {
 
         @Autowired
         private WeatherAIService weatherAIService;
@@ -32,7 +30,7 @@ public class WeatherAIServiceIT {
     @SpringBootTest
     @DisplayName("With Mistral Model")
     @Disabled("Disabling this test class temporarily")
-    class WeatherAIServiceMistralTest extends MistralTestContainer implements WeatherAIServiceMixinTest  {
+    class WeatherAIServiceMistralIT extends MistralTestContainer implements WeatherAIServiceMixinTest  {
 
         @Autowired
         private WeatherAIService weatherAIService;
@@ -47,7 +45,7 @@ public class WeatherAIServiceIT {
     @SpringBootTest
     @DisplayName("With GPT Model Model")
     @Disabled("Disabling this test class temporarily")
-    class WeatherAIServiceGptTest implements WeatherAIServiceMixinTest  {
+    class WeatherAIServiceGptIT implements WeatherAIServiceMixinTest  {
 
         @Autowired
         private WeatherAIService weatherAIService;
