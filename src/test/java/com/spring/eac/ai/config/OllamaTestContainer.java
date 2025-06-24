@@ -23,8 +23,8 @@ import java.util.List;
 public abstract class OllamaTestContainer {
 
     private static final String MODEL_NAME = "llama3.1:8b";
-    public static final String TC_IMAGE_NAME = "internal/tc-" + MODEL_NAME;
-    public static final String OLLAMA_DOCKER_IMAGE = "ollama/ollama:0.9.2";
+    private static final String TC_IMAGE_NAME = "internal/tc-ollama-" + MODEL_NAME;
+    private static final String OLLAMA_DOCKER_IMAGE = "ollama/ollama:0.9.2";
 
     @Container
     @ServiceConnection
