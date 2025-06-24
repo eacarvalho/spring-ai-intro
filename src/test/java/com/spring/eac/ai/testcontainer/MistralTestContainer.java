@@ -14,8 +14,8 @@ import org.testcontainers.ollama.OllamaContainer;
         "spring.ai.chat.client.enabled=false"
 })
 @Slf4j
-public abstract class GemmaTestContainer {
-    private static final String MODEL_NAME = "gemma2:2b";
+public abstract class MistralTestContainer {
+    private static final String MODEL_NAME = "mistral:7b";
 
     @Container
     @ServiceConnection
