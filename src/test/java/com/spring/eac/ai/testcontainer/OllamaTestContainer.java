@@ -1,4 +1,4 @@
-package com.spring.eac.ai.config;
+package com.spring.eac.ai.testcontainer;
 
 import com.github.dockerjava.api.model.Image;
 import lombok.extern.slf4j.Slf4j;
