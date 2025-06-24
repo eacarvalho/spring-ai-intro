@@ -1,35 +1,27 @@
-package com.spring.eac.ai.service;
+package com.spring.eac.ai.service.mixin;
 
 import com.spring.eac.ai.model.Answer;
 import com.spring.eac.ai.model.Question;
-import com.spring.eac.ai.testcontainer.LlamaTestContainer;
-import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Disabled;
+import com.spring.eac.ai.service.WeatherAIService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@Disabled("Disabling this test class temporarily")
-@SpringBootTest
-@Slf4j
-class WeatherAIServiceTest extends LlamaTestContainer {
+public interface WeatherAIServiceMixinTest {
 
-    @Autowired
-    private WeatherAIService weatherAIService;
+    WeatherAIService getWeatherAIService();
 
     @Test
     @DisplayName("Given a valid location, when asking for weather, then it should return the weather information.")
-    void getWeather_givenValidLocation_shouldReturnWeatherInformation() {
+    default void getWeather_givenValidLocation_shouldReturnWeatherInformation() {
         // Given
         var question = new Question("What is the weather now considering the latitude 51.509865 and -0.118092 longitude?");
 
         // When
-        Answer answer = weatherAIService.getWeather(question);
+        Answer answer = getWeatherAIService().getWeather(question);
 
         // Then
         assertThat(answer).isNotNull();
@@ -40,12 +32,12 @@ class WeatherAIServiceTest extends LlamaTestContainer {
 
     @Test
     @DisplayName("Given a fictional location, when asking for weather, then it should handle it gracefully.")
-    void getWeather_givenFictionalLocation_shouldHandleGracefully() {
+    default void getWeather_givenFictionalLocation_shouldHandleGracefully() {
         // Given
         var question = new Question("What is the weather like in Narnia?");
 
         // When
-        Answer answer = weatherAIService.getWeather(question);
+        Answer answer = getWeatherAIService().getWeather(question);
 
         // Then
         assertThat(answer).isNotNull();
@@ -58,12 +50,12 @@ class WeatherAIServiceTest extends LlamaTestContainer {
 
     @Test
     @DisplayName("Given a non-weather related question, when asking, then it should respond accordingly.")
-    void getWeather_givenNonWeatherQuestion_shouldRespondAccordingly() {
+    default void getWeather_givenNonWeatherQuestion_shouldRespondAccordingly() {
         // Given
         var question = new Question("What is the stock price of Microsoft?");
 
         // When
-        Answer answer = weatherAIService.getWeather(question);
+        Answer answer = getWeatherAIService().getWeather(question);
 
         // Then
         assertThat(answer).isNotNull();
