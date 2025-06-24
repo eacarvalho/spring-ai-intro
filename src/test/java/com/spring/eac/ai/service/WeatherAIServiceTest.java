@@ -1,50 +1,26 @@
 package com.spring.eac.ai.service;
 
-import com.spring.eac.ai.config.InternalOllamaContainer;
+import com.spring.eac.ai.config.OllamaTestContainer;
 import com.spring.eac.ai.model.Answer;
 import com.spring.eac.ai.model.Question;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.springframework.test.context.TestPropertySource;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.ollama.OllamaContainer;
-
-import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Disabled("Disabling this test class temporarily")
-@Testcontainers
 @SpringBootTest
-@TestPropertySource(properties = {
-        "spring.ai.ollama.chat.options.model=" + InternalOllamaContainer.MODEL_NAME,
-        "spring.ai.chat.client.enabled=false"
-})
 @Slf4j
-class WeatherAIServiceTest {
-
-    @Container
-    @ServiceConnection
-    static OllamaContainer ollama = new InternalOllamaContainer();
+class WeatherAIServiceTest extends OllamaTestContainer {
 
     @Autowired
     private WeatherAIService weatherAIService;
-
-    @BeforeAll
-    public static void beforeAll() throws IOException, InterruptedException {
-        if (!ollama.isRunning()) {
-            ollama.start();
-        }
-    }
 
     @Test
     @DisplayName("Given a valid location, when asking for weather, then it should return the weather information.")

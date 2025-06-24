@@ -14,3 +14,9 @@ sfg:
   aiapp:
     vector-store-local: true
     vector-store-enabled: false
+
+logging:
+  level:
+    root: INFO
+    org.testcontainers: TRACE
+    tc.testcontainers: TRACE
