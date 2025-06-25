@@ -1,19 +1,30 @@
-# Spring AI Intro: Capital Information Service
+# Spring AI Intro: From Experiment to Features
 
 ## Overview
-Spring AI Intro is a modern Spring Boot application that leverages OpenAI's capabilities to provide information about capital cities. The service offers simple, efficient endpoints for querying capital cities and receiving AI-powered responses.
+A small reference project that demonstrates how to:
+
+* build a **Spring Boot 3.5** application on **Java 21**
+* call OpenAI models through *spring-ai*
+* store and retrieve embeddings in **Milvus**
+* read and chunk documents with the *Tika* document reader
+* expose simple REST end-points
+* **NEW:** enrich answers with data fetched from the public  
+  [API Ninjas](https://api-ninjas.com/api) catalogue
 
 ## Features
 - Get capital city names for any country or state
 - Receive structured JSON responses
 - Simple and clean API interface
 - RESTful endpoints for easy integration
+- RAG with Vector Database Milvus
+- AI Tools for Weather and Stock Price
 
 ## Tech Stack
 - Spring Boot
 - Spring AI
 - OpenAI Integration
 - Java 21
+- Docker
 - Maven
 
 ## Prerequisites
@@ -21,6 +32,25 @@ Spring AI Intro is a modern Spring Boot application that leverages OpenAI's capa
 - Maven
 - OpenAI API key
 - IDE (IntelliJ IDEA, Eclipse, or VS Code)
+
+## 2  Configuration
+
+All secrets are read from environment variables or the `.env` file in the
+project root (use the provided `.env.template` as a starting point):
+
+| Variable | Purpose |
+|----------|---------|
+| `OPENAI_API_KEY`       | key for OpenAI completions / chat |
+| `API_NINJAS_KEY`       | key for all Api-Ninjas calls |
+| `MILVUS_IMAGE`         | Milvus Docker image tag (defaults to latest) |
+
+Example:
+```
+bash
+# .env
+OPENAI_API_KEY=sk-********************************
+API_NINJAS_KEY=ninjas_********************************
+```
 
 ## Quick Start
 
