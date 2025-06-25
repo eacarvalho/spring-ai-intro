@@ -1,19 +1,22 @@
-
 package com.spring.eac.ai.function;
 
 import com.spring.eac.ai.model.WeatherRequest;
 import com.spring.eac.ai.model.WeatherResponse;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
+import org.springframework.web.util.UriBuilder;
 
 import java.math.BigDecimal;
+import java.net.URI;
 import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -44,6 +47,7 @@ class WeatherServiceFunctionTest {
     }
 
     @Test
+    @DisplayName("Should throw IllegalArgumentException when weather request is null")
     void apply_WhenWeatherRequestIsNull_ShouldThrowIllegalArgumentException() {
         // When & Then
         IllegalArgumentException exception = assertThrows(
@@ -56,6 +60,7 @@ class WeatherServiceFunctionTest {
     }
 
     @Test
+    @DisplayName("Should throw IllegalArgumentException when latitude is below -90 degrees")
     void apply_WhenLatitudeIsTooLow_ShouldThrowIllegalArgumentException() {
         // Given
         WeatherRequest request = new WeatherRequest(-91.0, 0.0);
@@ -71,6 +76,7 @@ class WeatherServiceFunctionTest {
     }
 
     @Test
+    @DisplayName("Should throw IllegalArgumentException when latitude is above 90 degrees")
     void apply_WhenLatitudeIsTooHigh_ShouldThrowIllegalArgumentException() {
         // Given
         WeatherRequest request = new WeatherRequest(91.0, 0.0);
@@ -86,6 +92,7 @@ class WeatherServiceFunctionTest {
     }
 
     @Test
+    @DisplayName("Should throw IllegalArgumentException when longitude is below -180 degrees")
     void apply_WhenLongitudeIsTooLow_ShouldThrowIllegalArgumentException() {
         // Given
         WeatherRequest request = new WeatherRequest(0.0, -181.0);
@@ -101,6 +108,7 @@ class WeatherServiceFunctionTest {
     }
 
     @Test
+    @DisplayName("Should throw IllegalArgumentException when longitude is above 180 degrees")
     void apply_WhenLongitudeIsTooHigh_ShouldThrowIllegalArgumentException() {
         // Given
         WeatherRequest request = new WeatherRequest(0.0, 181.0);
@@ -116,12 +124,13 @@ class WeatherServiceFunctionTest {
     }
 
     @Test
+    @DisplayName("Should return weather response when valid request is provided")
     void apply_WhenValidRequest_ShouldReturnWeatherResponse() {
         // Given
         WeatherRequest request = new WeatherRequest(52.3676, 4.9041);
         WeatherResponse expectedResponse = new WeatherResponse(
-                "Amsterdam",                  // location
-                new BigDecimal("15.5"),       // windSpeed
+                "Amsterdam",          // location
+                new BigDecimal("15.5"),   // windSpeed
                 65,                           // windDegrees
                 20,                           // temp
                 75,                           // humidity
@@ -153,6 +162,7 @@ class WeatherServiceFunctionTest {
     }
 
     @Test
+    @DisplayName("Should call RestClient when boundary coordinates are provided")
     void apply_WhenBoundaryCoordinates_ShouldCallRestClient() {
         // Given
         WeatherRequest request = new WeatherRequest(-90.0, 180.0);
@@ -185,6 +195,7 @@ class WeatherServiceFunctionTest {
     }
 
     @Test
+    @DisplayName("Should throw RuntimeException when weather API returns bad request")
     void apply_WhenBadRequest_ShouldThrowRuntimeException() {
         // Given
         WeatherRequest request = new WeatherRequest(52.3676, 4.9041);
@@ -209,6 +220,7 @@ class WeatherServiceFunctionTest {
     }
 
     @Test
+    @DisplayName("Should throw RuntimeException when weather API returns unauthorized")
     void apply_WhenUnauthorized_ShouldThrowRuntimeException() {
         // Given
         WeatherRequest request = new WeatherRequest(52.3676, 4.9041);
@@ -233,6 +245,7 @@ class WeatherServiceFunctionTest {
     }
 
     @Test
+    @DisplayName("Should throw RuntimeException when weather API returns HTTP client error")
     void apply_WhenHttpClientError_ShouldThrowRuntimeException() {
         // Given
         WeatherRequest request = new WeatherRequest(52.3676, 4.9041);
@@ -258,6 +271,7 @@ class WeatherServiceFunctionTest {
     }
 
     @Test
+    @DisplayName("Should throw RuntimeException when RestClient throws network exception")
     void apply_WhenRestClientException_ShouldThrowRuntimeException() {
         // Given
         WeatherRequest request = new WeatherRequest(52.3676, 4.9041);
@@ -280,6 +294,7 @@ class WeatherServiceFunctionTest {
     }
 
     @Test
+    @DisplayName("Should throw RuntimeException when unexpected exception occurs")
     void apply_WhenUnexpectedException_ShouldThrowRuntimeException() {
         // Given
         WeatherRequest request = new WeatherRequest(52.3676, 4.9041);
@@ -302,12 +317,13 @@ class WeatherServiceFunctionTest {
     }
 
     @Test
+    @DisplayName("Should call RestClient when zero coordinates are provided")
     void apply_WhenZeroCoordinates_ShouldCallRestClient() {
         // Given
         WeatherRequest request = new WeatherRequest(0.0, 0.0);
         WeatherResponse expectedResponse = new WeatherResponse(
-                "Null Island",                // location
-                new BigDecimal("5.0"),        // windSpeed
+                "Null Island",        // location
+                new BigDecimal("5.0"),    // windSpeed
                 180,                          // windDegrees
                 28,                           // temp
                 80,                           // humidity
@@ -331,5 +347,61 @@ class WeatherServiceFunctionTest {
         // Then
         assertNotNull(result);
         assertEquals(expectedResponse, result);
+    }
+
+    @Test
+    @DisplayName("Should build correct URI when valid request is provided")
+    void apply_WhenValidRequest_ShouldBuildCorrectURI() {
+        // Given
+        WeatherRequest request = new WeatherRequest(52.3676, 4.9041);
+        WeatherResponse expectedResponse =  new WeatherResponse(
+                "Amsterdam",                  // location
+                new BigDecimal("15.5"),       // windSpeed
+                65,                           // windDegrees
+                20,                           // temp
+                75,                           // humidity
+                1656789000,                   // sunset
+                1656743400,                   // sunrise
+                15,                           // minTemp
+                30,                           // cloudPct
+                22,                           // feelsLike
+                25                            // maxTemp
+        );;
+
+        // Mock UriBuilder
+        UriBuilder mockUriBuilder = mock(UriBuilder.class);
+        URI mockUri = URI.create("https://api.api-ninjas.com/v1/weather?lat=52.3676&lon=4.9041");
+
+        when(mockUriBuilder.queryParam("lat", 52.3676)).thenReturn(mockUriBuilder);
+        when(mockUriBuilder.queryParam("lon", 4.9041)).thenReturn(mockUriBuilder);
+        when(mockUriBuilder.build()).thenReturn(mockUri);
+
+        // Capture the URI function
+        ArgumentCaptor<Function<UriBuilder, URI>> uriFunctionCaptor = ArgumentCaptor.forClass(Function.class);
+
+        // Mock the RestClient chain
+        doReturn(uriSpec).when(restClient).get();
+        doReturn(headerSpec).when(uriSpec).uri(uriFunctionCaptor.capture());
+        doReturn(responseSpec).when(headerSpec).retrieve();
+        when(responseSpec.body(WeatherResponse.class)).thenReturn(expectedResponse);
+
+        // When
+        WeatherResponse result = weatherServiceFunction.apply(request);
+
+        // Then
+        assertNotNull(result);
+
+        // Verify the URI function was captured and execute it
+        Function<UriBuilder, URI> capturedUriFunction = uriFunctionCaptor.getValue();
+        assertNotNull(capturedUriFunction);
+
+        // Execute the captured function with our mock UriBuilder
+        URI resultUri = capturedUriFunction.apply(mockUriBuilder);
+
+        // Verify the URI building logic
+        verify(mockUriBuilder).queryParam("lat", 52.3676);
+        verify(mockUriBuilder).queryParam("lon", 4.9041);
+        verify(mockUriBuilder, times(2)).build(); // Called twice in the lambda
+        assertEquals(mockUri, resultUri);
     }
 }
