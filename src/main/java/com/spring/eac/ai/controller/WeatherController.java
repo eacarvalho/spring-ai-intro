@@ -2,7 +2,6 @@ package com.spring.eac.ai.controller;
 
 import com.spring.eac.ai.model.Answer;
 import com.spring.eac.ai.model.Question;
-import com.spring.eac.ai.service.OpenAIService;
 import com.spring.eac.ai.service.WeatherAIService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;

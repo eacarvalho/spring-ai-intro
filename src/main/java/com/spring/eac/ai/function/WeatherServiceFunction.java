@@ -15,9 +15,16 @@ public class WeatherServiceFunction implements Function<WeatherRequest, WeatherR
     public static final String WEATHER_URL = "https://api.api-ninjas.com/v1/weather";
 
     private final String ninjasApiKey;
+    private final RestClient restClient;
 
     public WeatherServiceFunction(String ninjasApiKey) {
         this.ninjasApiKey = ninjasApiKey;
+        this.restClient = createRestClient();
+    }
+
+    public WeatherServiceFunction(String ninjasApiKey, RestClient restClient) {
+        this.ninjasApiKey = ninjasApiKey;
+        this.restClient = restClient;
     }
 
     @Override
@@ -42,19 +49,10 @@ public class WeatherServiceFunction implements Function<WeatherRequest, WeatherR
             throw new IllegalArgumentException("Longitude must be between -180 and 180 degrees");
         }
 
-        RestClient restClient = RestClient.builder()
-                .baseUrl(WEATHER_URL)
-                .defaultHeaders(httpHeaders -> {
-                    httpHeaders.set("X-Api-Key", ninjasApiKey);
-                    httpHeaders.set("Accept", "application/json");
-                    httpHeaders.set("Content-Type", "application/json");
-                }).build();
-
         try {
             return restClient.get().uri(uriBuilder -> {
                 log.info("Building URI for weather request: lat={}, lon={}", weatherRequest.lat(), weatherRequest.lon());
 
-                // Fix: Use "lat" and "lon" as parameter names (not "long")
                 uriBuilder.queryParam("lat", weatherRequest.lat());
                 uriBuilder.queryParam("lon", weatherRequest.lon());
 
@@ -80,5 +78,15 @@ public class WeatherServiceFunction implements Function<WeatherRequest, WeatherR
             log.error("Unexpected error calling weather API", e);
             throw new RuntimeException("Unexpected error retrieving weather data", e);
         }
+    }
+
+    private RestClient createRestClient() {
+        return RestClient.builder()
+                .baseUrl(WEATHER_URL)
+                .defaultHeaders(httpHeaders -> {
+                    httpHeaders.set("X-Api-Key", ninjasApiKey);
+                    httpHeaders.set("Accept", "application/json");
+                    httpHeaders.set("Content-Type", "application/json");
+                }).build();
     }
 }

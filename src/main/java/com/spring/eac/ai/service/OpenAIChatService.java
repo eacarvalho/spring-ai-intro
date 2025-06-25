@@ -25,9 +25,9 @@ import java.util.Map;
 import static java.util.Arrays.asList;
 
 @Service
-public class OpenAIService {
+public class OpenAIChatService {
 
-    private static final Logger log = LoggerFactory.getLogger(OpenAIService.class);
+    private static final Logger log = LoggerFactory.getLogger(OpenAIChatService.class);
 
     private final ChatModel chatModel;
     private final VectorStore vectorStore;
@@ -36,17 +36,17 @@ public class OpenAIService {
     // private final SyncMcpToolCallbackProvider toolCallbackProvider;
     // private final CustomerScoreService customerScoreService;
 
-    public OpenAIService(ChatModel chatModel,
-                         VectorStore vectorStore,
-                         @Qualifier("customerScoreAndAllTools") ToolCallbackProvider toolCallbackProvider,
-                         ResourceProperties resourceProperties) {
+    public OpenAIChatService(ChatModel chatModel,
+                             VectorStore vectorStore,
+                             @Qualifier("customerScoreAndAllTools") ToolCallbackProvider toolCallbackProvider,
+                             ResourceProperties resourceProperties) {
         this.chatModel = chatModel;
         this.vectorStore = vectorStore;
         this.toolCallbackProvider = toolCallbackProvider;
         this.resourceProperties = resourceProperties;
     }
 
-//    public OpenAIService(ChatModel chatModel,
+//    public OpenAIChatService(ChatModel chatModel,
 //                             SimpleVectorStore simpleVectorStore,
 //                             SyncMcpToolCallbackProvider toolCallbackProvider,
 //                             CustomerScoreService customerScoreService) {

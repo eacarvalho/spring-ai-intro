@@ -12,7 +12,7 @@
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "{\n    \"question\": \"What is the Spider Man movie?\"\n}",
+          "raw": "{\n    \"question\": \"What is a good truck to pull a sportman 212 boat?\"\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -66,6 +66,36 @@
       "response": []
     },
     {
+      "name": "image",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"question\": \"Create an image of a black labor retriever in a fall lake retrieving a duck\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/image",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "image"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
       "name": "stockprice",
       "request": {
         "method": "POST",
@@ -102,7 +132,7 @@
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "{\n    \"question\": \"Implement a python code calculating prime numbers\"\n}",
+          "raw": "{\n    \"question\": \"Create an test123.txt file\"\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -162,7 +192,7 @@
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "{\n    \"stateOrCountry\": \"Netherlands\"\n}",
+          "raw": "{\n    \"stateOrCountry\": \"France\"\n}",
           "options": {
             "raw": {
               "language": "json"

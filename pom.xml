@@ -22,7 +22,7 @@
 		<!-- Plugin versions -->
 		<maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
 		<maven-failsafe-plugin.version>3.2.5</maven-failsafe-plugin.version>
-		<jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
+		<jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
 	</properties>
 
 	<dependencies>
@@ -30,11 +30,11 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-devtools</artifactId>
-			<optional>true</optional>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.springframework.boot</groupId>-->
+<!--			<artifactId>spring-boot-devtools</artifactId>-->
+<!--			<optional>true</optional>-->
+<!--		</dependency>-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
@@ -251,6 +251,29 @@
 						<goals>
 							<goal>integration-test</goal>
 							<goal>verify</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<version>3.5.0</version>
+				<configuration>
+					<rules>
+						<requireJavaVersion>
+							<version>[21,22)</version>
+							<message>This project requires Java 21. Please configure JAVA_HOME accordingly.</message>
+						</requireJavaVersion>
+					</rules>
+					<fail>true</fail>
+				</configuration>
+				<executions>
+					<execution>
+						<id>enforce-java-version</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>enforce</goal>
 						</goals>
 					</execution>
 				</executions>
