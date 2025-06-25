@@ -3,6 +3,7 @@ package com.spring.eac.ai.function;
 import com.spring.eac.ai.model.WeatherRequest;
 import com.spring.eac.ai.model.WeatherResponse;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -46,6 +47,7 @@ class WeatherServiceFunctionTest {
     }
 
     @Test
+    @DisplayName("Should throw IllegalArgumentException when weather request is null")
     void apply_WhenWeatherRequestIsNull_ShouldThrowIllegalArgumentException() {
         // When & Then
         IllegalArgumentException exception = assertThrows(
@@ -58,6 +60,7 @@ class WeatherServiceFunctionTest {
     }
 
     @Test
+    @DisplayName("Should throw IllegalArgumentException when latitude is below -90 degrees")
     void apply_WhenLatitudeIsTooLow_ShouldThrowIllegalArgumentException() {
         // Given
         WeatherRequest request = new WeatherRequest(-91.0, 0.0);
@@ -73,6 +76,7 @@ class WeatherServiceFunctionTest {
     }
 
     @Test
+    @DisplayName("Should throw IllegalArgumentException when latitude is above 90 degrees")
     void apply_WhenLatitudeIsTooHigh_ShouldThrowIllegalArgumentException() {
         // Given
         WeatherRequest request = new WeatherRequest(91.0, 0.0);
@@ -88,6 +92,7 @@ class WeatherServiceFunctionTest {
     }
 
     @Test
+    @DisplayName("Should throw IllegalArgumentException when longitude is below -180 degrees")
     void apply_WhenLongitudeIsTooLow_ShouldThrowIllegalArgumentException() {
         // Given
         WeatherRequest request = new WeatherRequest(0.0, -181.0);
@@ -103,6 +108,7 @@ class WeatherServiceFunctionTest {
     }
 
     @Test
+    @DisplayName("Should throw IllegalArgumentException when longitude is above 180 degrees")
     void apply_WhenLongitudeIsTooHigh_ShouldThrowIllegalArgumentException() {
         // Given
         WeatherRequest request = new WeatherRequest(0.0, 181.0);
@@ -118,6 +124,7 @@ class WeatherServiceFunctionTest {
     }
 
     @Test
+    @DisplayName("Should return weather response when valid request is provided")
     void apply_WhenValidRequest_ShouldReturnWeatherResponse() {
         // Given
         WeatherRequest request = new WeatherRequest(52.3676, 4.9041);
@@ -155,6 +162,7 @@ class WeatherServiceFunctionTest {
     }
 
     @Test
+    @DisplayName("Should call RestClient when boundary coordinates are provided")
     void apply_WhenBoundaryCoordinates_ShouldCallRestClient() {
         // Given
         WeatherRequest request = new WeatherRequest(-90.0, 180.0);
@@ -187,6 +195,7 @@ class WeatherServiceFunctionTest {
     }
 
     @Test
+    @DisplayName("Should throw RuntimeException when weather API returns bad request")
     void apply_WhenBadRequest_ShouldThrowRuntimeException() {
         // Given
         WeatherRequest request = new WeatherRequest(52.3676, 4.9041);
@@ -211,6 +220,7 @@ class WeatherServiceFunctionTest {
     }
 
     @Test
+    @DisplayName("Should throw RuntimeException when weather API returns unauthorized")
     void apply_WhenUnauthorized_ShouldThrowRuntimeException() {
         // Given
         WeatherRequest request = new WeatherRequest(52.3676, 4.9041);
@@ -235,6 +245,7 @@ class WeatherServiceFunctionTest {
     }
 
     @Test
+    @DisplayName("Should throw RuntimeException when weather API returns HTTP client error")
     void apply_WhenHttpClientError_ShouldThrowRuntimeException() {
         // Given
         WeatherRequest request = new WeatherRequest(52.3676, 4.9041);
@@ -260,6 +271,7 @@ class WeatherServiceFunctionTest {
     }
 
     @Test
+    @DisplayName("Should throw RuntimeException when RestClient throws network exception")
     void apply_WhenRestClientException_ShouldThrowRuntimeException() {
         // Given
         WeatherRequest request = new WeatherRequest(52.3676, 4.9041);
@@ -282,6 +294,7 @@ class WeatherServiceFunctionTest {
     }
 
     @Test
+    @DisplayName("Should throw RuntimeException when unexpected exception occurs")
     void apply_WhenUnexpectedException_ShouldThrowRuntimeException() {
         // Given
         WeatherRequest request = new WeatherRequest(52.3676, 4.9041);
@@ -304,6 +317,7 @@ class WeatherServiceFunctionTest {
     }
 
     @Test
+    @DisplayName("Should call RestClient when zero coordinates are provided")
     void apply_WhenZeroCoordinates_ShouldCallRestClient() {
         // Given
         WeatherRequest request = new WeatherRequest(0.0, 0.0);
@@ -336,6 +350,7 @@ class WeatherServiceFunctionTest {
     }
 
     @Test
+    @DisplayName("Should build correct URI when valid request is provided")
     void apply_WhenValidRequest_ShouldBuildCorrectURI() {
         // Given
         WeatherRequest request = new WeatherRequest(52.3676, 4.9041);

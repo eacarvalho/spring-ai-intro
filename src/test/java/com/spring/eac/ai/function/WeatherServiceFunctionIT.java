@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.spring.eac.ai.model.WeatherRequest;
 import com.spring.eac.ai.model.WeatherResponse;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -43,6 +44,7 @@ class WeatherServiceFunctionIT {
     }
 
     @Test
+    @DisplayName("Should return weather data for Amsterdam coordinates")
     void apply_WhenAmsterdamCoordinates_ShouldReturnWeatherData() throws Exception {
         // Given
         WeatherRequest request = new WeatherRequest(52.3676, 4.9041);
@@ -85,6 +87,7 @@ class WeatherServiceFunctionIT {
     }
 
     @Test
+    @DisplayName("Should return weather data for Tokyo coordinates with network delay")
     void apply_WhenTokyoCoordinates_ShouldReturnWeatherData() throws Exception {
         // Given
         WeatherRequest request = new WeatherRequest(35.6762, 139.6503);
@@ -126,6 +129,7 @@ class WeatherServiceFunctionIT {
     }
 
     @Test
+    @DisplayName("Should throw RuntimeException when API key is unauthorized")
     void apply_WhenUnauthorizedApiKey_ShouldThrowRuntimeException() {
         // Given
         WeatherRequest request = new WeatherRequest(52.3676, 4.9041);
@@ -155,6 +159,7 @@ class WeatherServiceFunctionIT {
     }
 
     @Test
+    @DisplayName("Should handle extreme polar coordinates correctly")
     void apply_WhenPolarCoordinates_ShouldHandleExtremeLatitudes() throws Exception {
         // Given - Test with extreme coordinates
         WeatherRequest northPoleRequest = new WeatherRequest(90.0, 0.0);
