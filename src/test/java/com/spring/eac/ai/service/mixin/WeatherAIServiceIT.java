@@ -6,6 +6,7 @@ import com.spring.eac.ai.testcontainer.MistralTestContainer;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
+import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -20,9 +21,17 @@ public class WeatherAIServiceIT {
         @Autowired
         private WeatherAIService weatherAIService;
 
+        @Autowired
+        private ChatModel chatModel;
+
         @Override
         public WeatherAIService getWeatherAIService() {
             return weatherAIService;
+        }
+
+        @Override
+        public ChatModel getChatModel() {
+            return chatModel;
         }
     }
 
@@ -35,9 +44,17 @@ public class WeatherAIServiceIT {
         @Autowired
         private WeatherAIService weatherAIService;
 
+        @Autowired
+        private ChatModel chatModel;
+
         @Override
         public WeatherAIService getWeatherAIService() {
             return weatherAIService;
+        }
+
+        @Override
+        public ChatModel getChatModel() {
+            return chatModel;
         }
     }
 
@@ -50,9 +67,17 @@ public class WeatherAIServiceIT {
         @Autowired
         private WeatherAIService weatherAIService;
 
+        @Autowired
+        private ChatModel chatModel;
+
         @Override
         public WeatherAIService getWeatherAIService() {
             return weatherAIService;
+        }
+
+        @Override
+        public ChatModel getChatModel() {
+            return chatModel;
         }
     }
 }

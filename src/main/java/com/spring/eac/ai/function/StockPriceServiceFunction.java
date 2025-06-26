@@ -17,10 +17,25 @@ public class StockPriceServiceFunction implements Function<StockPriceRequest, St
 
     public static final String STOCK_URL = "https://api.api-ninjas.com/v1/stockprice";
 
-    private final String ninjasApiKey;
+    private final RestClient restClient;
 
     public StockPriceServiceFunction(String ninjasApiKey) {
-        this.ninjasApiKey = ninjasApiKey;
+        this.restClient = RestClient.builder()
+                .baseUrl(STOCK_URL)
+                .defaultHeaders(httpHeaders -> {
+                    httpHeaders.set("X-Api-Key", ninjasApiKey);
+                    httpHeaders.set("Accept", "application/json");
+                    httpHeaders.set("Content-Type", "application/json");
+                })
+                .requestInterceptor((request, body, execution) -> {
+                    log.info("Final URI: {}", request.getURI());
+                    return execution.execute(request, body);
+                })
+                .build();
+    }
+
+    public StockPriceServiceFunction(String ninjasApiKey, RestClient restClient) {
+        this.restClient = restClient;
     }
 
     @Override
@@ -31,25 +46,11 @@ public class StockPriceServiceFunction implements Function<StockPriceRequest, St
             throw new IllegalArgumentException("Ticker request cannot be null");
         }
 
-        RestClient restClient = RestClient.builder()
-                .baseUrl(STOCK_URL)
-                .defaultHeaders(httpHeaders -> {
-                    httpHeaders.set("X-Api-Key", ninjasApiKey);
-                    httpHeaders.set("Accept", "application/json");
-                    httpHeaders.set("Content-Type", "application/json");
-                }).build();
-
         try {
-            JsonNode jsonNode = restClient.get().uri(uriBuilder -> {
-                log.info("Building URI for stock price for ticker: {}", stockPriceRequest.ticker());
-
-                uriBuilder.queryParam("ticker", stockPriceRequest.ticker());
-
-                String finalUri = uriBuilder.build().toString();
-                log.info("Final URI: {}", finalUri);
-
-                return uriBuilder.build();
-            }).retrieve().body(JsonNode.class);
+            JsonNode jsonNode = restClient.get()
+                    .uri("?ticker={ticker}", stockPriceRequest.ticker())
+                    .retrieve()
+                    .body(JsonNode.class);
 
             if (ObjectUtils.isEmpty(jsonNode) || jsonNode.isEmpty()) {
                 return null;
