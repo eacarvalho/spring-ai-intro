@@ -17,10 +17,10 @@ public class OllamaContainerFactory {
 
     /**
      * REPOSITORY     TAG     CREATED         SIZE
-     * ollama/ollama  0.9.2   5 days ago      7.34GB
+     * ollama/ollama  0.9.3   5 days ago      5.58GB
      * ollama/ollama  0.3.6   10 months ago   1.1GB
      */
-    private static final String OLLAMA_DOCKER_IMAGE = "ollama/ollama:0.3.6";
+    private static final String OLLAMA_DOCKER_IMAGE = "ollama/ollama:0.9.3";
 
     public static OllamaContainer createContainer(String modelName) {
         String imageName = "internal/tc-ollama-" + modelName;

@@ -12,6 +12,10 @@ spring:
         options:
           model: gpt-4.1-2025-04-14
           temperature: 0.3
+      image:
+        options:
+          model: dall-e-2
+          temperature: 0.3
     vectorstore:
       type: none
       milvus:

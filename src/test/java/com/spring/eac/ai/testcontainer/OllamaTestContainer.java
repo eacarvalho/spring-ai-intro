@@ -25,7 +25,7 @@ import java.util.List;
  * <h2>Container Setup and Model Caching</h2>
  * On the first run, this class will:
  * <ol>
- *     <li>Start a standard Ollama container from the {@code ollama/ollama:0.9.2} image.</li>
+ *     <li>Start a standard Ollama container from the {@code ollama/ollama:0.9.3} image.</li>
  *     <li>Pull the specified language model (e.g., {@code llama3.1:8b}) into the container.</li>
  *     <li>Commit the container with the downloaded model to a new Docker image with a dedicated tag.</li>
  * </ol>
@@ -52,7 +52,7 @@ public abstract class OllamaTestContainer {
 
     private static final String MODEL_NAME = "llama3.1:8b";
     private static final String TC_IMAGE_NAME = "internal/tc-ollama-" + MODEL_NAME;
-    private static final String OLLAMA_DOCKER_IMAGE = "ollama/ollama:0.9.2";
+    private static final String OLLAMA_DOCKER_IMAGE = "ollama/ollama:0.9.3";
 
     @Container
     @ServiceConnection
