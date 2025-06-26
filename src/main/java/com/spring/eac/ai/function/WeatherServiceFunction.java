@@ -72,10 +72,10 @@ public class WeatherServiceFunction implements Function<WeatherRequest, WeatherR
             log.error("HTTP error from weather API: {} - {}", e.getStatusCode(), e.getResponseBodyAsString());
             throw new RuntimeException("Weather API error: " + e.getStatusCode() + " - " + e.getResponseBodyAsString(), e);
         } catch (RestClientException e) {
-            log.error("Network error calling weather API", e);
+            log.error("Network error calling weather API: {}", e.getMessage());
             throw new RuntimeException("Failed to connect to weather API", e);
         } catch (Exception e) {
-            log.error("Unexpected error calling weather API", e);
+            log.error("Unexpected error calling weather API: {}", e.getMessage());
             throw new RuntimeException("Unexpected error retrieving weather data", e);
         }
     }

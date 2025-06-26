@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @DisplayName("Weather AI Service Tests")
-public class WeatherAIServiceIT {
+class WeatherAIServiceIT {
 
     @Nested
     @SpringBootTest
