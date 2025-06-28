@@ -17,7 +17,7 @@ spring:
           model: dall-e-2
           temperature: 0.3
     vectorstore:
-      type: none
+      type: none # comment this line to enable Milvus
       milvus:
         initialize-schema: true
         client:
@@ -28,8 +28,14 @@ spring:
         databaseName: "default"
         collectionName: "vector_store"
         embeddingDimension: 1536
-        indexType: IVF_FLAT
+        # indexType: IVF_FLAT
         metricType: COSINE
+        indexType: HNSW
+        indexParameters:
+          M: 16
+          efConstruction: 200
+        searchParameters:
+          ef: 100
 #    mcp:
 #      client:
 #        stdio:
@@ -78,7 +84,7 @@ spring:
 sfg:
   aiapp:
     ninjas-api-key: ${NINJAS_API_KEY}
-    vector-store-local: true
+    vector-store-local: true # change to false to enable Milvus
     vector-store-enabled: true
     # vectorStorePath: /tmp/vectorstore.json
     vectorStorePath: vector-store/vectorstore.json

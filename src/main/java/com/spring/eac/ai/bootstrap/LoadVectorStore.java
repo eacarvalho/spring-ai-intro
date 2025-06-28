@@ -11,7 +11,11 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by jt, Spring Framework Guru.
@@ -32,7 +36,7 @@ public class LoadVectorStore implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
 
-        if (vectorStore.similaritySearch("Sportsman").isEmpty()){
+        if (vectorStore.similaritySearch("Sportsman").isEmpty()) {
             log.info("Loading documents into vector store");
 
             applicationProperties.getDocumentsToLoad().forEach(document -> {
@@ -41,11 +45,31 @@ public class LoadVectorStore implements CommandLineRunner {
                 TikaDocumentReader documentReader = new TikaDocumentReader(document);
                 List<Document> documents = documentReader.get();
 
-                TextSplitter textSplitter = new TokenTextSplitter();
+                TextSplitter textSplitter = TokenTextSplitter.builder()
+                        .withChunkSize(500)
+                        .withMinChunkSizeChars(100)
+                        .withMinChunkLengthToEmbed(5)
+                        .withMaxNumChunks(10000)
+                        .withKeepSeparator(true)
+                        .build();
 
-                List<Document> splitDocuments = textSplitter.apply(documents);
+                // Split documents into chunks
+                List<Document> chunks = new ArrayList<>();
+                for (Document doc : documents) {
+                    List<Document> documentChunks = textSplitter.split(doc);
 
-                vectorStore.add(splitDocuments);
+                    // Add metadata to each chunk
+                    documentChunks.forEach(chunk -> {
+                        Map<String, Object> chunkMetadata = new HashMap<>(chunk.getMetadata());
+                        chunkMetadata.put("source_file", document.getFilename());
+                        chunkMetadata.put("ingestion_timestamp", Instant.now().toString());
+                        chunk.getMetadata().putAll(chunkMetadata);
+                    });
+
+                    chunks.addAll(documentChunks);
+                }
+
+                vectorStore.add(chunks);
             });
         }
 
