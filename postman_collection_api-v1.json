@@ -96,6 +96,72 @@
       "response": []
     },
     {
+      "name": "talk",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"question\": \"Create an image of a black labor retriever in a fall lake retrieving a duck\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/image",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "image"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "vision",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "name",
+              "value": "my-image",
+              "type": "text"
+            },
+            {
+              "key": "file",
+              "type": "file",
+              "src": []
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/vision",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "vision"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
       "name": "stockprice",
       "request": {
         "method": "POST",
@@ -132,7 +198,7 @@
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "{\n    \"question\": \"Create an test123.txt file\"\n}",
+          "raw": "{\n    \"question\": \"Where is France?\"\n}",
           "options": {
             "raw": {
               "language": "json"

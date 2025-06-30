@@ -19,6 +19,19 @@ A small reference project that demonstrates how to:
 - RAG with Vector Database Milvus
 - AI Tools for Weather and Stock Price
 
+## Prompt Engineering
+
+- [Prompt Engineering Whitepaper from Google](https://www.kaggle.com/whitepaper-prompt-engineering)
+- [Anthropic's Prompt Engineering Guide](https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/overview)
+
+- OpenAI's 3-Part Video Series About Prompt Engineering:
+    - [Introduction to Prompt Engineering](https://academy.openai.com/public/videos/introduction-to-prompt-engineering-2025-02-13)
+    - [Advanced Prompt Engineering](https://academy.openai.com/public/videos/advanced-prompt-engineering-2025-02-13)
+    - [Mastering Prompt Engineering](https://academy.openai.com/public/videos/mastering-prompts-the-key-to-getting-what-you-need-from-chatgptmastering-prompts-the-key-to-getting-what-you-need-from-chatgpt-2025-03-20)
+
+- OpenAI's Reasoning Models:
+    - [Best Practices for Working with Reasoning Models](https://platform.openai.com/docs/guides/reasoning-best-practices)
+
 ## Tech Stack
 - Spring Boot
 - Spring AI
