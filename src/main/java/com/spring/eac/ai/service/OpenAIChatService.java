@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.ResponseEntity;
+import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
@@ -59,10 +60,15 @@ public class OpenAIChatService {
     public CapitalWithInfo getCapitalWithInfo(GetCapitalRequest getCapitalRequest) {
         PromptTemplate promptTemplate = new PromptTemplate(resourceProperties.getCapitalPromptWithInfo());
         Prompt prompt = promptTemplate.create(Map.of("stateOrCountry", getCapitalRequest.stateOrCountry()));
+        SimpleLoggerAdvisor customLogger = SimpleLoggerAdvisor.builder()
+                .requestToString(request -> "Custom request: " + request.prompt().getContents())
+                .responseToString(response -> "Custom response: " + response.getResult())
+                .build();
 
         // Only another test using ResponseEntity and ParameterizedTypeReference
         ResponseEntity<ChatResponse, CapitalWithInfo> chatResponse = ChatClient.create(chatModel)
                 .prompt()
+                .advisors(customLogger)
                 .system("""
                         Do not answer any questions not related to capitals.
                         If the question is not about capitals, set the capital field to "NOT_CAPITAL_RELATED" and 
@@ -123,7 +129,10 @@ public class OpenAIChatService {
         Prompt prompt = promptTemplate.create(Map.of(
                 "stateOrCountry", getCapitalRequest.stateOrCountry(),
                 "format", format));
-        ChatResponse response = chatModel.call(prompt);
+
+        ChatResponse response = chatModel
+
+                .call(prompt);
 
         String responseText = response.getResult().getOutput().getText();
 

@@ -112,6 +112,7 @@ management:
 logging:
   level:
     root: INFO
+    org.springframework.ai.chat.client.advisor: DEBUG
     org.springframework.ai.mcp: DEBUG
     org.springframework.ai.mcp.client.transport.StdioClientTransport: DEBUG
     org.springframework.ai.mcp.samples.brave: DEBUG
