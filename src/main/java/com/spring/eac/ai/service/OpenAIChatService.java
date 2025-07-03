@@ -130,10 +130,7 @@ public class OpenAIChatService {
                 "stateOrCountry", getCapitalRequest.stateOrCountry(),
                 "format", format));
 
-        ChatResponse response = chatModel
-
-                .call(prompt);
-
+        ChatResponse response = chatModel.call(prompt);
         String responseText = response.getResult().getOutput().getText();
 
         log.info("Got response: {}", responseText);

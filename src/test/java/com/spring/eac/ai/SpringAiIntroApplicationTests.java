@@ -1,5 +1,6 @@
 package com.spring.eac.ai;
 
+import com.spring.eac.ai.advisor.ReReadingAdvisor;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
@@ -55,6 +56,7 @@ class SpringAiIntroApplicationTests {
 
         ActorFilms actorFilms = chatClient.prompt()
                 .user("Generate the filmography for a random actor.")
+                .advisors(ReReadingAdvisor.builder().build())
                 .call()
                 .entity(ActorFilms.class);
 
