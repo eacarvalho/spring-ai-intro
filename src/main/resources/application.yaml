@@ -1,6 +1,14 @@
+# https://docs.spring.io/spring-ai/reference/api/chatclient.html#_implementation_notes
+# Due to a bug in Spring Boot 3.4, the "spring.http.client.factory=jdk" property must be set.
+# Otherwise, it’s set to "reactor" by default, which breaks certain AI workflows like the ImageModel.
+# spring.http.client.factory=jdk
+
 spring:
   application:
     name: spring-ai-intro
+#  http:
+#    client:
+#      factory: jdk
   ai:
     openai:
       api-key: ${OPENAI_API_KEY}

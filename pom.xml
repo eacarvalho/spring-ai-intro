@@ -35,6 +35,10 @@
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-webflux</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework.ai</groupId>
 			<artifactId>spring-ai-starter-model-openai</artifactId>
 		</dependency>
@@ -281,6 +285,44 @@
 			</plugin>
 		</plugins>
 	</build>
+
+    <!-- This is common when running Spring Boot WebFlux or any Netty-based application on Apple Silicon (M1/M2/M3) -->
+	<profiles>
+		<profile>
+			<id>macos-aarch64</id>
+			<activation>
+				<os>
+					<family>mac</family>
+					<arch>aarch64</arch>
+				</os>
+			</activation>
+			<dependencies>
+				<dependency>
+					<groupId>io.netty</groupId>
+					<artifactId>netty-resolver-dns-native-macos</artifactId>
+					<classifier>osx-aarch_64</classifier>
+					<scope>runtime</scope>
+				</dependency>
+			</dependencies>
+		</profile>
+		<profile>
+			<id>macos-x86_64</id>
+			<activation>
+				<os>
+					<family>mac</family>
+					<arch>x86_64</arch>
+				</os>
+			</activation>
+			<dependencies>
+				<dependency>
+					<groupId>io.netty</groupId>
+					<artifactId>netty-resolver-dns-native-macos</artifactId>
+					<classifier>osx-x86_64</classifier>
+					<scope>runtime</scope>
+				</dependency>
+			</dependencies>
+		</profile>
+	</profiles>
 
 	<repositories>
 		<repository>
