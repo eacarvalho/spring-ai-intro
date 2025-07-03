@@ -7,6 +7,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.ResponseEntity;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
+import org.springframework.ai.chat.messages.Message;
+import org.springframework.ai.chat.messages.SystemMessage;
+import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
@@ -77,7 +80,8 @@ public class OpenAIChatService {
                         """)
                 .user(prompt.getContents())
                 .call()
-                .responseEntity(new ParameterizedTypeReference<>() {});
+                .responseEntity(new ParameterizedTypeReference<>() {
+                });
 
         if (chatResponse.getEntity() == null ||
                 "NOT_CAPITAL_RELATED".equalsIgnoreCase(chatResponse.getEntity().capital()) ||
@@ -161,11 +165,33 @@ public class OpenAIChatService {
         return new Answer(response.getResult().getOutput().getText());
     }
 
+    /**
+     * Research in this area often involves analyzing and comparing different prompts to assess their effectiveness
+     * in various situations. For example, a significant study demonstrated that starting a prompt with
+     * "Take a deep breath and work on this problem step by step" significantly enhanced problem-solving efficiency
+     *
+     * https://docs.spring.io/spring-ai/reference/api/prompt.html#_prompt_engineering
+     *
+     * @param question
+     * @return
+     */
     public String getAnswer(String question) {
-        PromptTemplate promptTemplate = new PromptTemplate(question);
-        Prompt prompt = promptTemplate.create();
+        Message systemMessage = SystemMessage
+                .builder()
+                .text("""
+                            Take a deep breath and work on this problem step by step
+                        """)
+                .build();
 
-        ChatResponse response = chatModel.call(prompt);
+        UserMessage userMessage = UserMessage
+                .builder()
+                .text(question)
+                .build();
+
+        ChatResponse response = chatModel.call(Prompt
+                .builder()
+                .messages(systemMessage, userMessage)
+                .build());
 
         return response.getResult().getOutput().getText();
     }
