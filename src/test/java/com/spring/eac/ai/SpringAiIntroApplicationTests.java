@@ -6,7 +6,11 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.ai.chat.memory.MessageWindowChatMemory;
+import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.converter.BeanOutputConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,7 +18,11 @@ import org.springframework.core.ParameterizedTypeReference;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -70,7 +78,7 @@ class SpringAiIntroApplicationTests {
     @Test
     @Disabled("Disabling this test class temporarily")
     @DisplayName("Flux streaming response returns a non-empty list of actor films")
-    void fluxResponse_shouldReturnInformation() {
+    void fluxResponseWithBlock_shouldReturnInformation() {
         ChatClient chatClient = chatClientBuilder.build();
         var converter = new BeanOutputConverter<>(new ParameterizedTypeReference<List<ActorFilms>>() {
         });
@@ -96,6 +104,80 @@ class SpringAiIntroApplicationTests {
 
         assertNotNull(actorFilms);
         assertTrue(actorFilms.size() > 0, "actorFilms list should not be empty");
+    }
+
+    /**
+     * Based on: https://github.com/spring-projects/spring-ai/blob/main/models/spring-ai-openai/src/test/java/org/springframework/ai/openai/chat/OpenAiChatModelIT.java
+     *
+     * @throws InterruptedException
+     */
+    @Test
+    @Disabled("Disabling this test class temporarily")
+    @DisplayName("Flux streaming response returns a flux response using streaming")
+    void fluxResponse_shouldReturnInformation() throws InterruptedException {
+        ChatClient chatClient = chatClientBuilder.build();
+        UserMessage userMessage = new UserMessage("List ALL natural numbers in range [1, 20]. Make sure to not omit any.");
+        Prompt prompt = new Prompt(userMessage);
+
+        StringBuilder answer = new StringBuilder();
+        CountDownLatch latch = new CountDownLatch(1);
+
+        Flux<ChatResponse> chatResponseFlux = chatClient
+                .prompt(prompt)
+                .stream()
+                .chatResponse()
+                .doOnNext(chatResponse -> {
+                    String responseContent = chatResponse.getResult().getOutput().getText();
+                    answer.append(responseContent);
+                    // log.info("Answer (stream): {}", answer);
+                })
+                .doOnComplete(() -> {
+                    log.info("Final Answer: {}", answer.toString());
+                    latch.countDown();
+                });
+
+        chatResponseFlux.subscribe();
+
+        assertThat(latch.await(15, TimeUnit.SECONDS)).isTrue();
+        IntStream.rangeClosed(1, 20).forEach(n -> assertThat(answer).contains(String.valueOf(n)));
+    }
+
+    @Test
+    @Disabled("Disabling this test class temporarily")
+    @DisplayName("Chat memory recalls user's name when asked in a later message")
+    void chatMemory_shouldReturnInformation() {
+        ChatClient chatClient = chatClientBuilder.build();
+        ChatMemory memory = MessageWindowChatMemory.builder().build();
+        String conversationId = UUID.randomUUID().toString();
+
+        UserMessage userMessage1 = new UserMessage("My name is Eduardo");
+
+        memory.add(conversationId, userMessage1);
+
+        ChatResponse response1 = chatClient
+                .prompt(new Prompt(memory.get(conversationId)))
+                .call()
+                .chatResponse();
+
+        assertThat(response1).isNotNull();
+
+        memory.add(conversationId, response1.getResult().getOutput());
+
+        UserMessage userMessage2 = new UserMessage("What is my name?");
+
+        memory.add(conversationId, userMessage2);
+
+        ChatResponse response2 = chatClient
+                .prompt(new Prompt(memory.get(conversationId)))
+                .call()
+                .chatResponse();
+
+        assertThat(response2).isNotNull();
+
+        memory.add(conversationId, response2.getResult().getOutput());
+
+        assertThat(response2.getResults()).hasSize(1);
+        assertThat(response2.getResult().getOutput().getText()).contains("Eduardo");
     }
 
     record ActorFilms(String actor, List<String> movies) {
