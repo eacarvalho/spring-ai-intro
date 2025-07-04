@@ -13,30 +13,32 @@ import org.springframework.context.annotation.Configuration;
 public class ChatModelConfig {
 
     @Configuration
-    @ConditionalOnProperty(prefix = "spring.ai.chat.client", name = "enabled", havingValue = "true", matchIfMissing = true)
     static class OpenAiModelConfig {
 
         @Bean
+        @ConditionalOnProperty(prefix = "spring.ai.model", name = "chat", havingValue = "openai", matchIfMissing = true)
         public ChatModel chatModel(OpenAiChatModel chatModel) {
             return chatModel;
         }
 
         @Bean
+        @ConditionalOnProperty(prefix = "spring.ai.model", name = "embedding", havingValue = "openai", matchIfMissing = true)
         public EmbeddingModel embeddingModel(OpenAiEmbeddingModel embeddingModel) {
             return embeddingModel;
         }
     }
 
     @Configuration
-    @ConditionalOnProperty(prefix = "spring.ai.chat.client", name = "enabled", havingValue = "false")
     static class OllamaModelConfig {
 
         @Bean
+        @ConditionalOnProperty(prefix = "spring.ai.model", name = "chat", havingValue = "ollama")
         public ChatModel chatModel(OllamaChatModel chatModel) {
             return chatModel;
         }
 
         @Bean
+        @ConditionalOnProperty(prefix = "spring.ai.model", name = "embedding", havingValue = "ollama")
         public EmbeddingModel embeddingModel(OllamaEmbeddingModel embeddingModel) {
             return embeddingModel;
         }

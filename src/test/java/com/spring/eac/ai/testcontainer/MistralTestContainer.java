@@ -1,6 +1,5 @@
 package com.spring.eac.ai.testcontainer;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -11,9 +10,9 @@ import org.testcontainers.ollama.OllamaContainer;
 
 @Testcontainers(disabledWithoutDocker = true)
 @TestPropertySource(properties = {
-        "spring.ai.chat.client.enabled=false"
+        "spring.ai.model.chat=ollama",
+        "spring.ai.model.embedding=ollama"
 })
-@Slf4j
 public abstract class MistralTestContainer {
     private static final String MODEL_NAME = "mistral:7b";
 

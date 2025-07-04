@@ -45,7 +45,8 @@ import java.util.List;
  */
 @Testcontainers(disabledWithoutDocker = true)
 @TestPropertySource(properties = {
-        "spring.ai.chat.client.enabled=false"
+        "spring.ai.model.chat=ollama",
+        "spring.ai.model.embedding=ollama"
 })
 @Slf4j
 public abstract class OllamaTestContainer {

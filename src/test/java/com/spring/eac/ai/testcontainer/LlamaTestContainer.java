@@ -12,7 +12,8 @@ import org.testcontainers.ollama.OllamaContainer;
 @Slf4j
 @Testcontainers(disabledWithoutDocker = true)
 @TestPropertySource(properties = {
-        "spring.ai.chat.client.enabled=false"
+        "spring.ai.model.chat=ollama",
+        "spring.ai.model.embedding=ollama"
 })
 public abstract class LlamaTestContainer {
     private static final String MODEL_NAME = "llama3.1:8b";
