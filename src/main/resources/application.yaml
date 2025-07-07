@@ -6,10 +6,21 @@
 spring:
   application:
     name: spring-ai-intro
+#  datasource:
+#    url: jdbc:mysql://localhost:3306/chatdb
+#    username: chatuser
+#    password: chatpass
 #  http:
 #    client:
 #      factory: jdk
   ai:
+    chat:
+      memory:
+        repository:
+          jdbc:
+            platform: mysql
+            initialize-schema: always
+            schema: classpath:database/schema-mysql.sql
     openai:
       api-key: ${OPENAI_API_KEY}
       embedding:

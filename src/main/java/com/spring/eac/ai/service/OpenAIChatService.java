@@ -6,7 +6,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.ResponseEntity;
+import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.client.advisor.PromptChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
+import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
@@ -34,6 +37,7 @@ public class OpenAIChatService {
     private static final Logger log = LoggerFactory.getLogger(OpenAIChatService.class);
 
     private final ChatModel chatModel;
+    private final ChatMemory chatMemory;
     private final VectorStore vectorStore;
     private final ToolCallbackProvider toolCallbackProvider;
     private final ResourceProperties resourceProperties;
@@ -41,10 +45,12 @@ public class OpenAIChatService {
     // private final CustomerScoreService customerScoreService;
 
     public OpenAIChatService(ChatModel chatModel,
+                             ChatMemory chatMemory,
                              VectorStore vectorStore,
                              @Qualifier("customerScoreAndAllTools") ToolCallbackProvider toolCallbackProvider,
                              ResourceProperties resourceProperties) {
         this.chatModel = chatModel;
+        this.chatMemory = chatMemory;
         this.vectorStore = vectorStore;
         this.toolCallbackProvider = toolCallbackProvider;
         this.resourceProperties = resourceProperties;
@@ -202,10 +208,18 @@ public class OpenAIChatService {
      * @param question
      * @return
      */
-    public Answer search(Question question) {
+    public Answer search(String conversationId, Question question) {
+        // MessageChatMemoryAdvisor messageChatMemoryAdvisor = MessageChatMemoryAdvisor.builder(chatMemory).build();
+
+        PromptChatMemoryAdvisor promptChatMemoryAdvisor = PromptChatMemoryAdvisor
+                .builder(chatMemory)
+                .conversationId(conversationId)
+                .build();
+
         ChatClient chatClient = ChatClient
                 .builder(chatModel)
                 .defaultToolCallbacks(toolCallbackProvider.getToolCallbacks())
+                .defaultAdvisors(promptChatMemoryAdvisor)
                 // .defaultTools(new CustomerScoreService())
                 .build();
 
@@ -215,6 +229,7 @@ public class OpenAIChatService {
                         When using the tools for Customer Score and the customer does not exist, return:
                         Customer does not exist or does not have score.
                         """)
+                .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, conversationId))
                 .call()
                 .responseEntity(new ParameterizedTypeReference<>() {
                 });
