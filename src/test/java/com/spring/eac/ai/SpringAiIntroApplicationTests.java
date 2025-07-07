@@ -6,14 +6,15 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
-import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.converter.BeanOutputConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.Ordered;
 import org.springframework.core.ParameterizedTypeReference;
 import reactor.core.publisher.Flux;
 
@@ -33,6 +34,9 @@ class SpringAiIntroApplicationTests {
 
     @Autowired
     private ChatClient.Builder chatClientBuilder;
+
+    @Autowired
+    private ChatMemory chatMemory;
 
     @Test
     @DisplayName("Context loads without errors")
@@ -146,38 +150,39 @@ class SpringAiIntroApplicationTests {
     @Disabled("Disabling this test class temporarily")
     @DisplayName("Chat memory recalls user's name when asked in a later message")
     void chatMemory_shouldReturnInformation() {
-        ChatClient chatClient = chatClientBuilder.build();
-        ChatMemory memory = MessageWindowChatMemory.builder().build();
         String conversationId = UUID.randomUUID().toString();
+        ChatClient chatClient = chatClientBuilder.build();
+        MessageChatMemoryAdvisor messageChatMemoryAdvisor = MessageChatMemoryAdvisor
+                .builder(chatMemory)
+                .conversationId(conversationId)
+                .order(Ordered.HIGHEST_PRECEDENCE)
+                .build();
 
         UserMessage userMessage1 = new UserMessage("My name is Eduardo");
 
-        memory.add(conversationId, userMessage1);
-
         ChatResponse response1 = chatClient
-                .prompt(new Prompt(memory.get(conversationId)))
+                .prompt()
+                .messages(userMessage1)
+                .advisors(messageChatMemoryAdvisor)
                 .call()
                 .chatResponse();
 
         assertThat(response1).isNotNull();
-
-        memory.add(conversationId, response1.getResult().getOutput());
+        assertEquals(2, chatMemory.get(conversationId).size());
 
         UserMessage userMessage2 = new UserMessage("What is my name?");
 
-        memory.add(conversationId, userMessage2);
-
         ChatResponse response2 = chatClient
-                .prompt(new Prompt(memory.get(conversationId)))
+                .prompt()
+                .messages(userMessage2)
+                .advisors(messageChatMemoryAdvisor)
                 .call()
                 .chatResponse();
 
         assertThat(response2).isNotNull();
-
-        memory.add(conversationId, response2.getResult().getOutput());
-
         assertThat(response2.getResults()).hasSize(1);
         assertThat(response2.getResult().getOutput().getText()).contains("Eduardo");
+        assertEquals(4, chatMemory.get(conversationId).size());
     }
 
     record ActorFilms(String actor, List<String> movies) {

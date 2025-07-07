@@ -37,7 +37,6 @@ public class ChatMemoryConfig {
 
             log.info("Using jdbc chat memory because there is connection with Database");
 
-            // Improve to use token limit too
             return MessageWindowChatMemory.builder()
                     .chatMemoryRepository(jdbcChatMemoryRepository)
                     .maxMessages(10)
