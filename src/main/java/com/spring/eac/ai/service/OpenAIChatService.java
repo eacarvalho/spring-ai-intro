@@ -2,11 +2,11 @@ package com.spring.eac.ai.service;
 
 import com.spring.eac.ai.model.*;
 import com.spring.eac.ai.property.ResourceProperties;
+import com.spring.eac.ai.tool.DateTimeTools;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.ResponseEntity;
-import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.PromptChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
@@ -209,7 +209,12 @@ public class OpenAIChatService {
      * @return
      */
     public Answer search(String conversationId, Question question) {
-        // MessageChatMemoryAdvisor messageChatMemoryAdvisor = MessageChatMemoryAdvisor.builder(chatMemory).build();
+        /*
+        MessageChatMemoryAdvisor messageChatMemoryAdvisor = MessageChatMemoryAdvisor
+                .builder(chatMemory)
+                .conversationId(conversationId)
+                .build();
+         */
 
         PromptChatMemoryAdvisor promptChatMemoryAdvisor = PromptChatMemoryAdvisor
                 .builder(chatMemory)
@@ -220,6 +225,7 @@ public class OpenAIChatService {
                 .builder(chatModel)
                 .defaultToolCallbacks(toolCallbackProvider.getToolCallbacks())
                 .defaultAdvisors(promptChatMemoryAdvisor)
+                .defaultTools(new DateTimeTools())
                 // .defaultTools(new CustomerScoreService())
                 .build();
 

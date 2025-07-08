@@ -1,7 +1,9 @@
 package com.spring.eac.ai.config;
 
 import com.spring.eac.ai.tool.CustomerScoreTool;
+import com.spring.eac.ai.tool.DateTimeTools;
 import org.springframework.ai.mcp.SyncMcpToolCallbackProvider;
+import org.springframework.ai.support.ToolCallbacks;
 import org.springframework.ai.tool.StaticToolCallbackProvider;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.ToolCallbackProvider;
@@ -25,16 +27,14 @@ public class McpServerConfig {
         // Get MCP tool callbacks
         ToolCallback[] mcpCallbacks = toolCallbackProvider.getToolCallbacks();
 
-        // Create method-based tool callbacks
-        ToolCallbackProvider methodProvider = MethodToolCallbackProvider
-                .builder()
-                .toolObjects(customerScoreTool)
-                .build();
+        // Add all tools to another callback
+        ToolCallback[] allTools = ToolCallbacks.from(customerScoreTool);
+        // ToolCallback[] allTools = ToolCallbacks.from(customerScoreTool, new DateTimeTools());
 
         // Then combine them in your service where you use them
         List<ToolCallback> allCallbacks = new ArrayList<>();
         allCallbacks.addAll(Arrays.asList(mcpCallbacks));
-        allCallbacks.addAll(Arrays.asList(methodProvider.getToolCallbacks()));
+        allCallbacks.addAll(Arrays.asList(allTools));
 
         return new StaticToolCallbackProvider(allCallbacks);
     }

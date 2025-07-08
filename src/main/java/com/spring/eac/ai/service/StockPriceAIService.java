@@ -30,7 +30,7 @@ public class StockPriceAIService {
                 .builder("CurrentStockPrice", new StockPriceServiceFunction(ninjasApiKey))
                 .description("Get the current stock price for a stock symbol")
                 .inputType(StockPriceRequest.class)
-                .inputSchema(jsonSchema)
+                .inputSchema(jsonSchema) // Optional because the inputType was provided
                 .build();
 
         ChatClient chatClient = ChatClient
